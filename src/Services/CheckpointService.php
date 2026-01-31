@@ -208,7 +208,15 @@ class CheckpointService
         return $collection;
     }
 
-    /**$checkpoints = $this->loadCheckpoints();
+    /**
+     * Find a checkpoint by ID or name.
+     * 
+     * @param string|int $identifier Checkpoint ID or name
+     * @return Checkpoint|null
+     */
+    public function find($identifier): ?Checkpoint
+    {
+        $checkpoints = $this->loadCheckpoints();
 
         foreach ($checkpoints as $data) {
             // Try to match by ID (if numeric) or name
@@ -217,15 +225,7 @@ class CheckpointService
             }
         }
 
-        return null
-            $checkpoint = Checkpoint::find($identifier);
-            if ($checkpoint) {
-                return $checkpoint;
-            }
-        }
-
-        // Try to find by name
-        return Checkpoint::where('name', $identifier)->first();
+        return null;
     }
 
     /**
