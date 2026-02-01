@@ -30,7 +30,7 @@ class CheckpointVersionCommand extends Command
      */
     public function handle(): int
     {
-        $version = "1.1.0";
+        $version = "1.0.0";
         
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');

@@ -50,6 +50,30 @@ class CheckpointCreateCommand extends Command
             $this->line("  Name:    {$checkpoint->name}");
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
+
+            // If no note was provided via option, ask if user wants to add one now
+            if (!$note) {
+                $this->line('');
+                if ($this->confirm('Would you like to add a note to this checkpoint?', false)) {
+                    $newNote = $this->ask('Enter the note for this checkpoint');
+
+                    if ($newNote) {
+                        // Update the note for the newly created checkpoint
+                        $checkpoint = $service->updateNote($checkpoint->id, $newNote);
+
+                        $this->info("✓ Note added successfully!");
+                        $this->line("  Note: {$newNote}");
+                    } else {
+                        $this->info('No note added.');
+                    }
+                } else {
+                    $this->info('No note added.');
+                }
+            } else {
+                // Show the note that was added via the option
+                $this->line("  Note: {$note}");
+            }
+
             $this->line('');
 
             return self::SUCCESS;

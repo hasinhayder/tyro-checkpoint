@@ -23,7 +23,8 @@ class CheckpointService
      */
     public function getCheckpointStoragePath(): string
     {
-        return storage_path('tyro-checkpoints');
+        // Use the configured storage path, falling back to default if not set
+        return config('tyro-checkpoint.storage_path', storage_path('tyro-checkpoints'));
     }
 
     /**

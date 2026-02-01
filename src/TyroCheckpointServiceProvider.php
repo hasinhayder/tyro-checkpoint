@@ -21,6 +21,17 @@ class TyroCheckpointServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Publish configuration file
+        $this->publishes([
+            __DIR__ . '/../config/tyro-checkpoint.php' => config_path('tyro-checkpoint.php'),
+        ], 'config');
+
+        // Merge configuration
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/tyro-checkpoint.php',
+            'tyro-checkpoint'
+        );
+
         // Register migrations
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 

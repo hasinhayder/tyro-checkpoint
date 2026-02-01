@@ -8,9 +8,9 @@ use TyroLabs\TyroCheckpoint\Exceptions\CheckpointException;
 
 /**
  * CheckpointAddNoteCommand
- * 
+ *
  * Adds or updates a note for an existing checkpoint.
- * 
+ *
  * Usage:
  *   php artisan tyro-checkpoint:add-note
  *   php artisan tyro-checkpoint:add-note {id}
@@ -42,34 +42,17 @@ class CheckpointAddNoteCommand extends Command
             }
 
             // Get the checkpoint identifier
-            $identifier = $this->argument('id');
+            $identifier = $this->getCheckpointIdentifier($checkpoints);
 
             if (!$identifier) {
-                // Show checkpoints and ask for selection
-                $this->info('Available checkpoints:');
-                $this->line('');
+                $this->error('✗ No checkpoint selected.');
+                return self::FAILURE;
+            }
 
-                $options = [];
-                $indexMap = [];
-                $index = 1;
-                foreach ($checkpoints as $checkpoint) {
-                    $label = "#{$checkpoint->id} - {$checkpoint->name}";
-                    if ($checkpoint->note) {
-                        $label .= " (Current note: {$checkpoint->note})";
-                    }
-                    $options[$index] = $label;
-                    $indexMap[$index] = $checkpoint->id;
-                    $index++;
-                }
-
-                $selectedLabel = $this->choice(
-                    'Select a checkpoint to add/update note (enter the number)',
-                    $options
-                );
-
-                // Find the index that corresponds to the selected label
-                $selectedIndex = array_search($selectedLabel, $options);
-                $identifier = $indexMap[$selectedIndex];
+            // Validate identifier format
+            if (!$this->isValidIdentifier($identifier)) {
+                $this->error("✗ Invalid checkpoint identifier: {$identifier}");
+                return self::FAILURE;
             }
 
             // Find the checkpoint
@@ -80,28 +63,20 @@ class CheckpointAddNoteCommand extends Command
                 return self::FAILURE;
             }
 
-            // Show current note if exists
-            if ($checkpoint->note) {
-                $this->line('');
-                $this->info('Current note: ' . $checkpoint->note);
-            }
+            // Get the new note from user
+            $note = $this->getNewNoteFromUser($checkpoint);
 
-            // Ask for the new note
-            $this->line('');
-            $note = $this->ask('Enter the new note (leave empty to remove)');
+            // Validate note length if provided
+            if ($note !== null && !$this->isValidNote($note)) {
+                $this->error('✗ Note exceeds maximum length of 1000 characters.');
+                return self::FAILURE;
+            }
 
             // Update the note
-            $service->updateNote($identifier, $note ?: null);
+            $updatedCheckpoint = $service->updateNote($identifier, $note);
 
-            // Success message
-            $this->line('');
-            if ($note) {
-                $this->info("✓ Note updated successfully for checkpoint: {$checkpoint->name}");
-                $this->line("  Note: {$note}");
-            } else {
-                $this->info("✓ Note removed from checkpoint: {$checkpoint->name}");
-            }
-            $this->line('');
+            // Display success message
+            $this->displaySuccessMessage($updatedCheckpoint, $note);
 
             return self::SUCCESS;
 
@@ -113,5 +88,148 @@ class CheckpointAddNoteCommand extends Command
             $this->error("✗ An unexpected error occurred: {$e->getMessage()}");
             return self::FAILURE;
         }
+    }
+
+    /**
+     * Get checkpoint identifier from argument or user selection.
+     */
+    private function getCheckpointIdentifier($checkpoints): ?string
+    {
+        $identifier = $this->argument('id');
+
+        if ($identifier) {
+            return $identifier;
+        }
+
+        // Show checkpoints and ask for selection
+        $this->info('Available checkpoints:');
+        $this->line('');
+
+        $options = [];
+        $indexMap = [];
+        $index = 1;
+
+        foreach ($checkpoints as $checkpoint) {
+            $label = "#{$checkpoint->id} - {$checkpoint->name}";
+            if ($checkpoint->note) {
+                $label .= " (Current note: " . $this->truncateNote($checkpoint->note) . ")";
+            }
+            $options[$index] = $label;
+            $indexMap[$index] = $checkpoint->id;
+            $index++;
+        }
+
+        $headers = ['#', 'Name', 'Note'];
+        $rows = $this->formatTableRows($checkpoints);
+        $this->table($headers, $rows);
+
+        $selectedLabel = $this->choice(
+            'Select a checkpoint to add/update note',
+            $options,
+            null,
+            null,
+            false // Allow multiple selections to be disabled
+        );
+
+        // Find the index that corresponds to the selected label
+        $selectedIndex = array_search($selectedLabel, $options);
+        return $indexMap[$selectedIndex] ?? null;
+    }
+
+    /**
+     * Get the new note from user input.
+     */
+    private function getNewNoteFromUser($checkpoint): ?string
+    {
+        // Show current note if exists
+        if ($checkpoint->note) {
+            $this->line('');
+            $this->info('Current note: ' . $this->truncateNote($checkpoint->note));
+        }
+
+        // Ask for the new note
+        $this->line('');
+        $question = $checkpoint->note
+            ? 'Enter the new note (leave empty to remove current note)'
+            : 'Enter the new note (leave empty to skip)';
+
+        $note = $this->ask($question);
+
+        // Return null if empty to remove the note
+        return $note ?: null;
+    }
+
+    /**
+     * Display success message after updating the note.
+     */
+    private function displaySuccessMessage($checkpoint, ?string $note): void
+    {
+        $this->line('');
+        if ($note) {
+            $this->info("✓ Note updated successfully for checkpoint: {$checkpoint->name}");
+            $this->line("  Note: {$note}");
+        } else {
+            $this->info("✓ Note removed from checkpoint: {$checkpoint->name}");
+        }
+        $this->line('');
+    }
+
+    /**
+     * Truncate note for display purposes.
+     */
+    private function truncateNote(string $note, int $maxLength = 50): string
+    {
+        if (strlen($note) <= $maxLength) {
+            return $note;
+        }
+
+        return substr($note, 0, $maxLength) . '...';
+    }
+
+    /**
+     * Validate checkpoint identifier format.
+     */
+    private function isValidIdentifier($identifier): bool
+    {
+        // Check if it's a numeric ID or a valid name
+        if (is_numeric($identifier)) {
+            return true;
+        }
+
+        // For names, ensure they match expected pattern (alphanumeric, underscores, hyphens, dots)
+        return preg_match('/^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$/', $identifier) === 1;
+    }
+
+    /**
+     * Validate note content.
+     */
+    private function isValidNote(string $note): bool
+    {
+        // Maximum length validation
+        return strlen($note) <= 1000;
+    }
+
+    /**
+     * Format checkpoints data for table display.
+     */
+    private function formatTableRows($checkpoints): array
+    {
+        $rows = [];
+        foreach ($checkpoints as $checkpoint) {
+            $row = [
+                "#{$checkpoint->id}",
+                $checkpoint->name
+            ];
+
+            if ($checkpoint->note) {
+                $row[] = $this->truncateNote($checkpoint->note, 30); // Shorter for table view
+            } else {
+                $row[] = '<comment>No note</comment>';
+            }
+
+            $rows[] = $row;
+        }
+
+        return $rows;
     }
 }

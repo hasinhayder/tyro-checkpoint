@@ -48,13 +48,14 @@ class CheckpointFlushCommand extends Command
             $this->line('');
 
             // Display checkpoints in a table
-            $headers = ['ID', 'Name', 'Size', 'Created'];
+            $headers = ['ID', 'Name', 'Size', 'Created', 'Locked'];
             $rows = $checkpoints->map(function ($checkpoint) use ($service) {
                 return [
                     $checkpoint->id,
                     $checkpoint->name,
                     $service->formatFileSize($checkpoint->size),
                     $checkpoint->created_at->format('Y-m-d H:i:s'),
+                    $checkpoint->locked ? 'Yes' : 'No',
                 ];
             })->toArray();
 
@@ -71,11 +72,19 @@ class CheckpointFlushCommand extends Command
                 }
             }
 
-            // Delete all checkpoints
+            // Delete all checkpoints (skip locked ones)
             $this->info('Deleting checkpoints...');
             $deletedCount = 0;
+            $skippedCount = 0;
 
             foreach ($checkpoints as $checkpoint) {
+                // Skip locked checkpoints
+                if ($checkpoint->locked) {
+                    $this->warn("Skipping locked checkpoint: '{$checkpoint->name}' (ID: {$checkpoint->id})");
+                    $skippedCount++;
+                    continue;
+                }
+
                 try {
                     $service->delete($checkpoint->id);
                     $deletedCount++;
@@ -87,10 +96,14 @@ class CheckpointFlushCommand extends Command
             // Success message
             $this->line('');
             $this->info("✓ Flushed {$deletedCount} checkpoint(s) successfully!");
-            
-            if ($deletedCount < $checkpoints->count()) {
-                $failedCount = $checkpoints->count() - $deletedCount;
-                $this->warn("⚠ {$failedCount} checkpoint(s) could not be deleted.");
+
+            if ($skippedCount > 0) {
+                $this->warn("⚠ {$skippedCount} locked checkpoint(s) were skipped and not deleted.");
+            }
+
+            if ($deletedCount < ($checkpoints->count() - $skippedCount)) {
+                $failedCount = $checkpoints->count() - $deletedCount - $skippedCount;
+                $this->warn("⚠ {$failedCount} checkpoint(s) could not be deleted due to other errors.");
             }
 
             return self::SUCCESS;
