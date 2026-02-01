@@ -120,12 +120,13 @@ class CheckpointService
 
     /**
      * Create a new checkpoint.
-     * 
+     *
      * @param string|null $name Optional checkpoint name
+     * @param string|null $note Optional note for the checkpoint
      * @return Checkpoint
      * @throws CheckpointException
      */
-    public function create(?string $name = null): Checkpoint
+    public function create(?string $name = null, ?string $note = null): Checkpoint
     {
         $this->ensureStorageDirectoryExists();
 
@@ -178,6 +179,8 @@ class CheckpointService
             'path' => $checkpointPath,
             'size' => $size,
             'created_at' => now()->toIso8601String(),
+            'locked' => false, // New checkpoints are not locked by default
+            'note' => $note,
         ];
 
         // Add to checkpoints array
@@ -274,7 +277,7 @@ class CheckpointService
 
     /**
      * Delete a checkpoint and its associated file.
-     * 
+     *
      * @param string $identifier Checkpoint ID or name
      * @return bool
      * @throws CheckpointException
@@ -287,6 +290,13 @@ class CheckpointService
         if (!$checkpoint) {
             throw new CheckpointException(
                 "Checkpoint not found: {$identifier}"
+            );
+        }
+
+        // Check if the checkpoint is locked
+        if ($checkpoint->locked) {
+            throw new CheckpointException(
+                "Cannot delete locked checkpoint: {$identifier}. Please unlock it first."
             );
         }
 
@@ -305,6 +315,136 @@ class CheckpointService
         $this->saveCheckpoints($filtered);
 
         return true;
+    }
+
+    /**
+     * Lock a checkpoint to prevent deletion.
+     *
+     * @param string $identifier Checkpoint ID or name
+     * @return Checkpoint
+     * @throws CheckpointException
+     */
+    public function lock(string $identifier): Checkpoint
+    {
+        // Find the checkpoint
+        $checkpoint = $this->find($identifier);
+
+        if (!$checkpoint) {
+            throw new CheckpointException(
+                "Checkpoint not found: {$identifier}"
+            );
+        }
+
+        // Load checkpoints and update the matching one
+        $checkpoints = $this->loadCheckpoints();
+        $updated = false;
+
+        foreach ($checkpoints as &$data) {
+            if ($data['id'] === $checkpoint->id) {
+                $data['locked'] = true;
+                $updated = true;
+                break;
+            }
+        }
+
+        if (!$updated) {
+            throw new CheckpointException(
+                "Failed to lock checkpoint: {$identifier}"
+            );
+        }
+
+        // Save updated list
+        $this->saveCheckpoints($checkpoints);
+
+        // Return updated checkpoint
+        return new Checkpoint($checkpoints[array_search($checkpoint->id, array_column($checkpoints, 'id'))]);
+    }
+
+    /**
+     * Unlock a checkpoint to allow deletion.
+     *
+     * @param string $identifier Checkpoint ID or name
+     * @return Checkpoint
+     * @throws CheckpointException
+     */
+    public function unlock(string $identifier): Checkpoint
+    {
+        // Find the checkpoint
+        $checkpoint = $this->find($identifier);
+
+        if (!$checkpoint) {
+            throw new CheckpointException(
+                "Checkpoint not found: {$identifier}"
+            );
+        }
+
+        // Load checkpoints and update the matching one
+        $checkpoints = $this->loadCheckpoints();
+        $updated = false;
+
+        foreach ($checkpoints as &$data) {
+            if ($data['id'] === $checkpoint->id) {
+                $data['locked'] = false;
+                $updated = true;
+                break;
+            }
+        }
+
+        if (!$updated) {
+            throw new CheckpointException(
+                "Failed to unlock checkpoint: {$identifier}"
+            );
+        }
+
+        // Save updated list
+        $this->saveCheckpoints($checkpoints);
+
+        // Return updated checkpoint
+        return new Checkpoint($checkpoints[array_search($checkpoint->id, array_column($checkpoints, 'id'))]);
+    }
+
+    /**
+     * Update the note for a checkpoint.
+     *
+     * @param string $identifier Checkpoint ID or name
+     * @param string|null $note The note to set (null to remove)
+     * @return Checkpoint
+     * @throws CheckpointException
+     */
+    public function updateNote(string $identifier, ?string $note): Checkpoint
+    {
+        // Find the checkpoint
+        $checkpoint = $this->find($identifier);
+
+        if (!$checkpoint) {
+            throw new CheckpointException(
+                "Checkpoint not found: {$identifier}"
+            );
+        }
+
+        // Load checkpoints and update the matching one
+        $checkpoints = $this->loadCheckpoints();
+        $updated = false;
+
+        foreach ($checkpoints as &$data) {
+            if ($data['id'] === $checkpoint->id) {
+                $data['note'] = $note;
+                $updated = true;
+                break;
+            }
+        }
+
+        if (!$updated) {
+            throw new CheckpointException(
+                "Failed to update note for checkpoint: {$identifier}"
+            );
+        }
+
+        // Save updated list
+        $this->saveCheckpoints($checkpoints);
+
+        // Return updated checkpoint
+        return new Checkpoint($checkpoints[array_search($checkpoint->id, array_column($checkpoints, 'id'))]);
     }
 
     /**

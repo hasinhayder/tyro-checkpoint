@@ -48,16 +48,21 @@ class CheckpointListCommand extends Command
             $this->line('');
 
             $rows = $checkpoints->map(function ($checkpoint) use ($service) {
+                $name = $checkpoint->name;
+                if ($checkpoint->locked) {
+                    $name .= ' 🔒'; // Add lock symbol for locked checkpoints
+                }
                 return [
                     $checkpoint->id,
-                    $checkpoint->name,
+                    $name,
+                    $checkpoint->note ?? '-',
                     $service->formatFileSize($checkpoint->size),
                     $checkpoint->created_at->format('Y-m-d H:i:s'),
                 ];
             })->toArray();
 
             $this->table(
-                ['ID', 'Name', 'Size', 'Created At'],
+                ['ID', 'Name', 'Note', 'Size', 'Created At'],
                 $rows
             );
 

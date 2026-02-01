@@ -20,7 +20,7 @@ class CheckpointCreateCommand extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:create {name? : Optional name for the checkpoint}';
+    protected $signature = 'tyro-checkpoint:create {name? : Optional name for the checkpoint} {--note= : Optional note for the checkpoint}';
 
     /**
      * The console command description.
@@ -35,12 +35,13 @@ class CheckpointCreateCommand extends Command
         try {
             // Get the checkpoint name from argument
             $name = $this->argument('name');
+            $note = $this->option('note');
 
             // Show info message
             $this->info('Creating checkpoint...');
 
             // Create the checkpoint
-            $checkpoint = $service->create($name);
+            $checkpoint = $service->create($name, $note);
 
             // Success message
             $this->info("✓ Checkpoint created successfully!");

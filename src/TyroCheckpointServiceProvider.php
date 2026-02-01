@@ -10,6 +10,9 @@ use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointDeleteCommand;
 use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointFlushCommand;
 use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointVersionCommand;
 use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointInstallCommand;
+use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointAddNoteCommand;
+use TyroLabs\TyroCheckpoint\Console\Commands\LockCommand;
+use TyroLabs\TyroCheckpoint\Console\Commands\UnlockCommand;
 
 class TyroCheckpointServiceProvider extends ServiceProvider
 {
@@ -31,6 +34,9 @@ class TyroCheckpointServiceProvider extends ServiceProvider
                 CheckpointFlushCommand::class,
                 CheckpointVersionCommand::class,
                 CheckpointInstallCommand::class,
+                CheckpointAddNoteCommand::class,
+                LockCommand::class,
+                UnlockCommand::class,
             ]);
         }
     }
