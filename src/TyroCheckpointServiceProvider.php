@@ -1,18 +1,18 @@
 <?php
 
-namespace TyroLabs\TyroCheckpoint;
+namespace HasinHayder\TyroCheckpoint;
 
 use Illuminate\Support\ServiceProvider;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointCreateCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointListCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointRestoreCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointDeleteCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointFlushCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointVersionCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointInstallCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\CheckpointAddNoteCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\LockCommand;
-use TyroLabs\TyroCheckpoint\Console\Commands\UnlockCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointCreateCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointListCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointRestoreCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointDeleteCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointFlushCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointVersionCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointInstallCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointAddNoteCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\LockCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\UnlockCommand;
 
 class TyroCheckpointServiceProvider extends ServiceProvider
 {

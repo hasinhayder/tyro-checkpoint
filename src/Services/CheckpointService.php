@@ -1,11 +1,11 @@
 <?php
 
-namespace TyroLabs\TyroCheckpoint\Services;
+namespace HasinHayder\TyroCheckpoint\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use TyroLabs\TyroCheckpoint\Models\Checkpoint;
-use TyroLabs\TyroCheckpoint\Exceptions\CheckpointException;
+use HasinHayder\TyroCheckpoint\Models\Checkpoint;
+use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 
 /**
  * CheckpointService

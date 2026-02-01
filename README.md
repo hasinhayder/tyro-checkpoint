@@ -6,26 +6,28 @@ Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint fu
 
 ## Features
 
-- ✅ Create full database snapshots with a single command
-- ✅ List all available checkpoints with metadata
-- ✅ Restore any checkpoint to reset your database state
-- ✅ Delete old checkpoints to save disk space
-- ✅ SQLite only (perfect for local development)
-- ✅ Simple and production-safe
-- ✅ No configuration required
+-  Create full database snapshots with a single command
+-  List all available checkpoints with metadata
+-  Restore any checkpoint to reset your database state
+-  Delete old checkpoints to save disk space
+-  **Lock checkpoints** to prevent accidental deletion
+-  **Add notes** to checkpoints for better organization
+-  SQLite only (perfect for local development)
+-  Simple and production-safe
+-  No configuration required
 
 ## Requirements
 
 - PHP 8.1 or higher
-- Laravel 10.x or 11.x
-- SQLite database (local development only)
+- Laravel 10.x, 11.x or 12.x
+- SQLite database
 
 ## Installation
 
 Install the package via Composer:
 
 ```bash
-composer require tyrolabs/tyro-checkpoint --dev
+composer require hasinhayder/tyro-checkpoint --dev
 ```
 
 The package will automatically register itself via Laravel's package discovery.
@@ -45,6 +47,16 @@ This will:
 That's it! You're ready to create checkpoints.
 
 **Note**: No database migrations are needed as checkpoint metadata is stored in a JSON file.
+
+### Optional: Publish Configuration
+
+Publish the configuration file to customize settings:
+
+```bash
+php artisan tyro-checkpoint:publish-config
+```
+
+This creates `config/tyro-checkpoint.php` where you can customize the storage path.
 
 ## Usage
 
@@ -70,7 +82,7 @@ Creating checkpoint...
   ID:      1
   Name:    my_feature_before_changes
   Size:    2.45 MB
-  Created: 2026-01-23 10:30:15
+  Created: 2026-02-01 10:30:15
 ```
 
 ### List All Checkpoints
@@ -85,13 +97,13 @@ Example output:
 ```
 Found 3 checkpoint(s):
 
-+----+---------------------------+---------+---------------------+
-| ID | Name                      | Size    | Created At          |
-+----+---------------------------+---------+---------------------+
-| 3  | before_user_migration     | 2.48 MB | 2026-01-23 14:20:00 |
-| 2  | after_seeding             | 2.45 MB | 2026-01-23 12:15:30 |
-| 1  | clean_database            | 1.98 MB | 2026-01-23 10:00:00 |
-+----+---------------------------+---------+---------------------+
++----+---------------------------+---------+---------------------+--------+-------+
+| ID | Name                      | Size    | Created At          | Locked | Note  |
++----+---------------------------+---------+---------------------+--------+-------+
+| 3  | before_user_migration     | 2.48 MB | 2026-02-01 14:20:00 | No     |       |
+| 2  | after_seeding             | 2.45 MB | 2026-02-01 12:15:30 | Yes    | Clean |
+| 1  | clean_database            | 1.98 MB | 2026-02-01 10:00:00 | No     |       |
++----+---------------------------+---------+---------------------+--------+-------+
 ```
 
 ### Restore a Checkpoint
@@ -117,12 +129,44 @@ Checkpoint to restore:
   ID:      1
   Name:    clean_database
   Size:    1.98 MB
-  Created: 2026-01-23 10:00:00
+  Created: 2026-02-01 10:00:00
 
 Do you want to proceed? (yes/no) [no]:
 ```
 
 **Important**: Checkpoints are NOT deleted after restoration. You can restore the same checkpoint multiple times, allowing you to experiment with different approaches and always return to the same state.
+
+### Add a Note to a Checkpoint
+
+Add a descriptive note to help you remember what a checkpoint represents:
+
+```bash
+php artisan tyro-checkpoint:add-note 1
+```
+
+You'll be prompted to enter your note:
+```
+Enter note for checkpoint #1 (or press Enter to remove existing note):
+> Clean state with seeded users
+```
+
+The note will be displayed when you list checkpoints.
+
+### Lock/Unlock a Checkpoint
+
+Lock a checkpoint to prevent accidental deletion:
+
+```bash
+php artisan tyro-checkpoint:lock 1
+```
+
+Unlock a checkpoint to allow deletion:
+
+```bash
+php artisan tyro-checkpoint:unlock 1
+```
+
+Locked checkpoints cannot be deleted individually or via the flush command. This is useful for preserving important baseline states.
 
 ### Delete a Checkpoint
 
@@ -138,44 +182,44 @@ Or delete by name:
 php artisan tyro-checkpoint:delete clean_database
 ```
 
-You'll be asked to confirm before deletion:
+You'll be asked to confirm before deletion. Note that locked checkpoints cannot be deleted:
 
 ```
 Checkpoint to delete:
-  ID:      1
-  Name:    clean_database
-  Size:    1.98 MB
-  Created: 2026-01-23 10:00:00
+  ID:      2
+  Name:    after_seeding
+  Size:    2.45 MB
+  Created: 2026-02-01 12:15:30
+  Note:    Clean state
 
 Are you sure you want to delete this checkpoint? (yes/no) [no]:
 ```
 
 ### Delete All Checkpoints
 
-Delete all checkpoints at once with the flush command:
+Delete all **unlocked** checkpoints at once with the flush command:
 
 ```bash
 php artisan tyro-checkpoint:flush
 ```
 
-You'll see a list of all checkpoints and be asked to confirm:
+Locked checkpoints are preserved. You'll see a list of checkpoints to be deleted:
 
 ```
-⚠ WARNING: This will delete ALL checkpoints permanently!
+⚠ WARNING: This will delete ALL unlocked checkpoints permanently!
 
 Checkpoints to be deleted:
 
-+----+---------------------------+---------+---------------------+
-| ID | Name                      | Size    | Created At          |
-+----+---------------------------+---------+---------------------+
-| 3  | before_user_migration     | 2.48 MB | 2026-01-23 14:20:00 |
-| 2  | after_seeding             | 2.45 MB | 2026-01-23 12:15:30 |
-| 1  | clean_database            | 1.98 MB | 2026-01-23 10:00:00 |
-+----+---------------------------+---------+---------------------+
++----+---------------------------+---------+---------------------+--------+
+| ID | Name                      | Size    | Created At          | Locked |
++----+---------------------------+---------+---------------------+--------+
+| 3  | before_user_migration     | 2.48 MB | 2026-02-01 14:20:00 | No     |
+| 1  | clean_database            | 1.98 MB | 2026-02-01 10:00:00 | No     |
++----+---------------------------+---------+---------------------+--------+
 
-Total: 3 checkpoint(s)
+Total: 2 checkpoint(s) (1 locked checkpoint will be preserved)
 
-Are you sure you want to delete ALL checkpoints? (yes/no) [no]:
+Are you sure you want to delete ALL unlocked checkpoints? (yes/no) [no]:
 ```
 
 Skip the confirmation prompt with the `--force` flag:
@@ -188,12 +232,30 @@ php artisan tyro-checkpoint:flush --force
 
 1. **Checkpoints are full snapshots**: Each checkpoint is a complete copy of your SQLite database file (no diffs or incrementals)
 2. **Stored locally**: Checkpoint files are stored in `storage/tyro-checkpoints/`
-3. **Metadata tracking**: Checkpoint metadata (ID, name, path, size, created_at) is stored in `storage/tyro-checkpoints/checkpoints.json` - **outside the database** to prevent loss when restoring
+3. **Metadata tracking**: Checkpoint metadata (ID, name, path, size, created_at, locked, note) is stored in `storage/tyro-checkpoints/checkpoints.json` - **outside the database** to prevent loss when restoring
 4. **Restore process**: Restoring a checkpoint replaces your current database file with the selected checkpoint file
 5. **Persistent checkpoints**: Checkpoints are NOT automatically deleted after restoration. You can restore the same checkpoint multiple times and must manually delete checkpoints when no longer needed.
 6. **Safe restoration**: Because metadata is stored outside the database, you never lose track of any checkpoint, even when restoring to an earlier state
+7. **Lock protection**: Locked checkpoints are protected from deletion to preserve important baseline states
 
 ## Common Use Cases
+
+### Protect Important Baselines with Lock
+
+```bash
+# Create and lock a clean baseline
+php artisan tyro-checkpoint:create clean_baseline
+php artisan tyro-checkpoint:lock clean_baseline
+php artisan tyro-checkpoint:add-note clean_baseline
+# Enter: "Fresh install with migrations and seeders"
+
+# Now you can safely flush all other checkpoints
+php artisan tyro-checkpoint:flush
+# Your locked baseline is preserved!
+
+# Restore to baseline anytime
+php artisan tyro-checkpoint:restore clean_baseline
+```
 
 ### Before Running Migrations
 
@@ -229,16 +291,6 @@ php artisan tyro-checkpoint:restore before_experiment
 # Try yet another approach - same checkpoint, multiple restores
 ```
 
-### Cleanup Old Checkpoints
-
-```bash
-# Delete a specific checkpoint when done
-php artisan tyro-checkpoint:delete old_checkpoint
-
-# Or delete all checkpoints at once
-php artisan tyro-checkpoint:flush
-```
-
 ## Additional Commands
 
 ### Check Version and Status
@@ -268,16 +320,16 @@ Useful when:
 - Verifying your SQLite configuration
 - Creating the checkpoint storage directory
 
-## Upgrading from v1.0.x
+### Publish Configuration
 
-If you're upgrading from an earlier version that stored checkpoint metadata in the database:
+Publish the configuration file:
 
-1. **Your existing checkpoint files are safe** - They're still in `storage/tyro-checkpoints/`
-2. **Checkpoint list will be empty** - The old metadata was in the database
-3. **No action required** - Just start creating new checkpoints with the new version
-4. **Optional cleanup** - You can manually delete old checkpoint `.sqlite` files if you no longer need them
+```bash
+php artisan tyro-checkpoint:publish-config
+```
 
-The new version stores metadata in `checkpoints.json` which survives database restores.
+This creates `config/tyro-checkpoint.php` where you can customize:
+- Checkpoint storage path
 
 ## Storage Location
 
@@ -290,10 +342,27 @@ storage/tyro-checkpoints/
 └── ...
 ```
 
-- **checkpoints.json**: Contains metadata (ID, name, path, size, created_at) for all checkpoints
+- **checkpoints.json**: Contains metadata (ID, name, path, size, created_at, locked, note) for all checkpoints
 - **{checkpoint_name}.sqlite**: The actual database snapshot files
 
 **Important**: The metadata is stored in a JSON file (not in the database) so that restoring a checkpoint doesn't cause you to lose track of other checkpoints.
+
+## Configuration
+
+Publish the configuration file to customize settings:
+
+```bash
+php artisan tyro-checkpoint:publish-config
+```
+
+The published configuration file (`config/tyro-checkpoint.php`) allows you to customize:
+
+```php
+return [
+    // Custom storage path for checkpoints
+    'storage_path' => storage_path('tyro-checkpoints'),
+];
+```
 
 ## Important Notes
 
@@ -305,6 +374,7 @@ storage/tyro-checkpoints/
 - **Checkpoints persist after restore**: Checkpoints are NOT automatically deleted when restored. This allows you to restore the same checkpoint multiple times to test different approaches.
 - **Manual cleanup required**: Use `php artisan tyro-checkpoint:delete` or `php artisan tyro-checkpoint:flush` to remove checkpoints you no longer need.
 - **Disk space**: Each checkpoint is a full copy of your database, so they can consume disk space. Delete old checkpoints you no longer need.
+- **Locked checkpoints**: Locked checkpoints are protected from deletion. Use this to preserve important baseline states.
 
 ## Error Handling
 
@@ -315,36 +385,9 @@ The package includes comprehensive error handling:
 - **Missing database file**: Error if the database file doesn't exist
 - **Duplicate name**: Error if creating a checkpoint with an existing name
 - **Missing checkpoint**: Error if trying to restore/delete a non-existent checkpoint
+- **Locked checkpoint**: Error if trying to delete a locked checkpoint
 - **File operations**: Error if checkpoint file operations fail
 
-## Package Structure
-
-```
-tyro-checkpoint/
-├── src/
-│   ├── Console/
-│   │   └── Commands/
-│   │       ├── CheckpointCreateCommand.php
-│   │       ├── CheckpointListCommand.php
-│   │       ├── CheckpointRestoreCommand.php
-│   │       ├── CheckpointDeleteCommand.php
-│   │       ├── CheckpointFlushCommand.php
-│   │       ├── CheckpointVersionCommand.php
-│   │       └── CheckpointInstallCommand.php
-│   ├── Exceptions/
-│   │   └── CheckpointException.php
-│   ├── Models/
-│   │   └── Checkpoint.php
-│   ├── Services/
-│   │   └── CheckpointService.php
-│   └── TyroCheckpointServiceProvider.php
-├── database/
-│   └── migrations/
-│       └── 2026_01_23_000000_create_tyro_checkpoints_table.php
-├── composer.json
-├── LICENSE
-└── README.md
-```
 
 ## Contributing
 
@@ -356,7 +399,7 @@ This package is open-sourced software licensed under the [MIT license](LICENSE).
 
 ## Credits
 
-Created by [Tyro Labs](https://tyrolabs.com)
+Created by [Hasin Hayder](https://hasinhayder.com)
 
 ## Support
 

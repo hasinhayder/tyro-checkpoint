@@ -1,6 +1,6 @@
 <?php
 
-namespace TyroLabs\TyroCheckpoint\Exceptions;
+namespace HasinHayder\TyroCheckpoint\Exceptions;
 
 use Exception;
 

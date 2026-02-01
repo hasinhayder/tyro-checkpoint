@@ -1,12 +1,12 @@
 {
-    "name": "tyrolabs/tyro-checkpoint",
+    "name": "hasinhayder/tyro-checkpoint",
     "description": "Database checkpoint management for Laravel local development (SQLite only)",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Tyro Labs",
-            "email": "info@tyrolabs.com"
+            "name": "Hasin Hayder",
+            "email": "hasin@hasinhayder.com"
         }
     ],
     "require": {
@@ -21,18 +21,18 @@
     },
     "autoload": {
         "psr-4": {
-            "TyroLabs\\TyroCheckpoint\\": "src/"
+            "HasinHayder\\TyroCheckpoint\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "TyroLabs\\TyroCheckpoint\\Tests\\": "tests/"
+            "HasinHayder\\TyroCheckpoint\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "TyroLabs\\TyroCheckpoint\\TyroCheckpointServiceProvider"
+                "HasinHayder\\TyroCheckpoint\\TyroCheckpointServiceProvider"
             ]
         }
     },

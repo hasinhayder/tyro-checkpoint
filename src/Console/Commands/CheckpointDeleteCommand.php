@@ -1,10 +1,10 @@
 <?php
 
-namespace TyroLabs\TyroCheckpoint\Console\Commands;
+namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
 use Illuminate\Console\Command;
-use TyroLabs\TyroCheckpoint\Services\CheckpointService;
-use TyroLabs\TyroCheckpoint\Exceptions\CheckpointException;
+use HasinHayder\TyroCheckpoint\Services\CheckpointService;
+use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 
 /**
  * CheckpointDeleteCommand

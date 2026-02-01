@@ -1,6 +1,6 @@
 <?php
 
-namespace TyroLabs\TyroCheckpoint\Models;
+namespace HasinHayder\TyroCheckpoint\Models;
 
 use Carbon\Carbon;
 

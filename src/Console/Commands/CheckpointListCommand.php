@@ -1,9 +1,9 @@
 <?php
 
-namespace TyroLabs\TyroCheckpoint\Console\Commands;
+namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
 use Illuminate\Console\Command;
-use TyroLabs\TyroCheckpoint\Services\CheckpointService;
+use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 
 /**
  * CheckpointListCommand

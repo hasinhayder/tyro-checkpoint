@@ -1,6 +1,6 @@
 <?php
 
-namespace TyroLabs\TyroCheckpoint\Console\Commands;
+namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
