@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyro Checkpoint — Laravel SQLite Checkpoint System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent: #ff6b00;
+            --accent-hover: #ff8533;
+            --border: #2a2a2a;
+            --border-light: #333333;
+            --code-bg: #0d0d0d;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           TYPOGRAPHY
+        ═══════════════════════════════════════════════════════════════ */
+        .display-text {
+            font-family: 'Anton', sans-serif;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            line-height: 0.95;
+        }
+
+        .display-xl {
+            font-size: clamp(3.5rem, 12vw, 10rem);
+        }
+
+        .display-lg {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+        }
+
+        .display-md {
+            font-size: clamp(1.75rem, 4vw, 3rem);
+        }
+
+        .mono {
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           LAYOUT UTILITIES
+        ═══════════════════════════════════════════════════════════════ */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            padding: 6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           NAVIGATION
+        ═══════════════════════════════════════════════════════════════ */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 0;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-cta {
+            background: var(--accent);
+            color: var(--bg-primary) !important;
+            padding: 0.625rem 1.25rem;
+            font-weight: 600 !important;
+            transition: background 0.2s ease;
+        }
+
+        .nav-cta:hover {
+            background: var(--accent-hover);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           HERO SECTION
+        ═══════════════════════════════════════════════════════════════ */
+        .hero {
+            min-height: 100vh;
+            /* display: flex; */
+            align-items: center;
+            padding: 8rem 0rem 6rem 3rem;
+            position: relative;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            margin: 0 -2rem;
+        }
+
+        .hero-main {
+            position: relative;
+        }
+
+        .hero-title {
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title .outline {
+            -webkit-text-stroke: 2px var(--text-primary);
+            color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 540px;
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+
+        .hero-badges {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border-light);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .hero-code {
+            position: relative;
+        }
+
+        .code-window {
+            background: var(--code-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .code-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .code-dot.red { background: #ff5f57; }
+        .code-dot.yellow { background: #ffbd2e; }
+        .code-dot.green { background: #28c940; }
+
+        .code-title {
+            margin-left: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'DM Mono', monospace;
+        }
+
+        .code-content {
+            padding: 1.5rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-line {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .line-num {
+            color: var(--text-muted);
+            min-width: 2rem;
+            user-select: none;
+        }
+
+        .line-code {
+            color: var(--text-secondary);
+        }
+
+        .code-keyword { color: #ff79c6; }
+        .code-string { color: #f1fa8c; }
+        .code-comment { color: #6272a4; }
+        .code-class { color: #8be9fd; }
+        .code-cmd { color: var(--accent); }
+
+        /* ═══════════════════════════════════════════════════════════════
+           FEATURES SECTION
+        ═══════════════════════════════════════════════════════════════ */
+        .features {
+            background: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .feature-card:hover .feature-number {
+            color: var(--accent);
+        }
+
+        .feature-number {
+            font-family: 'Anton', sans-serif;
+            font-size: 4rem;
+            line-height: 1;
+            color: var(--bg-tertiary);
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .feature-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           WHY SECTION
+        ═══════════════════════════════════════════════════════════════ */
+        .why-section {
+            background: var(--bg-primary);
+        }
+
+        .why-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .why-main h2 {
+            margin-bottom: 2rem;
+        }
+
+        .why-content p {
+            color: var(--text-secondary);
+            font-size: 1.0625rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .why-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .why-list li {
+            color: var(--text-secondary);
+            font-size: 1.0625rem;
+            padding: 0.75rem 0 0.75rem 1.5rem;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .why-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .why-side {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .why-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+        }
+
+        .why-card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-tertiary);
+        }
+
+        .why-card-number {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .why-card-body {
+            padding: 1.5rem;
+        }
+
+        .why-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .why-step {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .why-step-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .why-step-dot.accent {
+            background: var(--accent);
+        }
+
+        .why-step-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .why-time {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-light);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .why-time.accent {
+            color: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           COMMANDS SECTION
+        ═══════════════════════════════════════════════════════════════ */
+        .commands-section {
+            background: var(--bg-primary);
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+        }
+
+        .command-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            padding: 1.5rem;
+        }
+
+        .command-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .command-line {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .command-prompt {
+            color: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           INSTALLATION SECTION
+        ═══════════════════════════════════════════════════════════════ */
+        .install-section {
+            background: var(--bg-secondary);
+        }
+
+        .install-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .install-step {
+            margin-bottom: 2rem;
+        }
+
+        .install-step-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .install-step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: var(--bg-primary);
+            font-family: 'Anton', sans-serif;
+            font-size: 0.875rem;
+        }
+
+        .install-code {
+            background: var(--code-bg);
+            border: 1px solid var(--border-light);
+            padding: 1.25rem 1.5rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+        }
+
+        .install-code .code-cmd {
+            color: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           FOOTER
+        ═══════════════════════════════════════════════════════════════ */
+        footer {
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-light);
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand .logo {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .footer-tagline {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            max-width: 300px;
+        }
+
+        .footer-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.625rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .tyrolabs-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .tyrolabs-link:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .tyrolabs-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .footer-metro {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-metro a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-metro a:hover {
+            color: var(--text-primary);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-code {
+                order: -1;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .why-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section {
+                padding: 4rem 0;
+            }
+
+            .hero {
+                padding: 6rem 0 4rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a:not(.nav-cta) {
+                display: none;
+            }
+
+            .hero-badges {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .footer-metro {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           ANIMATIONS
+        ═══════════════════════════════════════════════════════════════ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-main > * {
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .hero-title { animation-delay: 0.1s; }
+        .hero-badges { animation-delay: 0.2s; }
+        .hero-subtitle { animation-delay: 0.3s; }
+        .hero-cta { animation-delay: 0.4s; }
+        .hero-code { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <!-- NAV -->
+    <nav>
+        <div class="container">
+            <div class="nav-inner">
+                <a href="#" class="logo">TYRO<span>CHECKPOINT</span></a>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#commands">Commands</a>
+                    <a href="#install">Install</a>
+                    <a href="https://github.com/tyrolabs/tyro-checkpoint" class="nav-cta">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-main">
+                    <h1 class="display-text display-xl hero-title">
+                        SAVE<br>
+                        <span class="outline">RESTORE</span><br>
+                        REPEAT
+                    </h1>
+                    <div class="hero-badges">
+                        <span class="badge">SQLite Checkpoints</span>
+                        <span class="badge">For Laravel</span>
+                        <span class="badge">Lightning Fast</span>
+                    </div>
+                    <p class="hero-subtitle">
+                        A powerful database checkpoint system for Laravel. Save your SQLite database state instantly, restore when needed, and never lose your development flow again.
+                    </p>
+                    <div class="hero-cta">
+                        <a href="#install" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Install Now
+                        </a>
+                        <a href="https://github.com/tyrolabs/tyro-checkpoint" class="btn btn-secondary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
+                            View Source
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-code">
+                    <div class="code-window">
+                        <div class="code-header">
+                            <span class="code-dot red"></span>
+                            <span class="code-dot yellow"></span>
+                            <span class="code-dot green"></span>
+                            <span class="code-title">terminal</span>
+                        </div>
+                        <div class="code-content">
+                            <div class="code-line">
+                                <span class="line-num">01</span>
+                                <span class="line-code"><span class="code-comment"># Create a checkpoint</span></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">02</span>
+                                <span class="line-code">$ <span class="code-cmd">php artisan tyro-checkpoint:create</span> user-seeded</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">03</span>
+                                <span class="line-code"></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">04</span>
+                                <span class="line-code"><span class="code-comment">✓ Checkpoint saved: ID #1</span></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">05</span>
+                                <span class="line-code"></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">06</span>
+                                <span class="line-code"><span class="code-comment"># Restore anytime</span></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">07</span>
+                                <span class="line-code">$ <span class="code-cmd">php artisan tyro-checkpoint:restore</span> 1</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">08</span>
+                                <span class="line-code"></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">09</span>
+                                <span class="line-code"><span class="code-comment">✓ Database restored to checkpoint #1</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY TYRO CHECKPOINT -->
+    <section class="section why-section" id="why">
+        <div class="container">
+            <div class="why-grid">
+                <div class="why-main">
+                    <span class="section-label">Why Tyro Checkpoint</span>
+                    <h2 class="display-text display-lg">THE PROBLEM</h2>
+                    <div class="why-content">
+                        <p>During Laravel development, you constantly test features, experiment with data changes, and debug database-related issues. Every time something breaks or you need to switch contexts, you're faced with the same tedious cycle:</p>
+                        <ul class="why-list">
+                            <li>Dropping and recreating the database</li>
+                            <li>Re-running migrations</li>
+                            <li>Re-seeding data — often the most time-consuming part</li>
+                        </ul>
+                        <p>This repetitive workflow kills productivity and interrupts your development flow. What you need is a way to save clean database states and restore them instantly — without the overhead.</p>
+                    </div>
+                </div>
+                <div class="why-side">
+                    <div class="why-card">
+                        <div class="why-card-header">
+                            <span class="why-card-number">BEFORE</span>
+                        </div>
+                        <div class="why-card-body">
+                            <div class="why-timeline">
+                                <div class="why-step">
+                                    <span class="why-step-dot"></span>
+                                    <span class="why-step-text">Drop database</span>
+                                </div>
+                                <div class="why-step">
+                                    <span class="why-step-dot"></span>
+                                    <span class="why-step-text">Run migrations</span>
+                                </div>
+                                <div class="why-step">
+                                    <span class="why-step-dot"></span>
+                                    <span class="why-step-text">Seed data (slow)</span>
+                                </div>
+                                <div class="why-step">
+                                    <span class="why-step-dot"></span>
+                                    <span class="why-step-text">Repeat every time</span>
+                                </div>
+                            </div>
+                            <div class="why-time">~2-5 minutes per reset</div>
+                        </div>
+                    </div>
+                    <div class="why-card">
+                        <div class="why-card-header">
+                            <span class="why-card-number">AFTER</span>
+                        </div>
+                        <div class="why-card-body">
+                            <div class="why-timeline">
+                                <div class="why-step">
+                                    <span class="why-step-dot accent"></span>
+                                    <span class="why-step-text">Create checkpoint once</span>
+                                </div>
+                                <div class="why-step">
+                                    <span class="why-step-dot accent"></span>
+                                    <span class="why-step-text">Restore instantly</span>
+                                </div>
+                                <div class="why-step">
+                                    <span class="why-step-dot accent"></span>
+                                    <span class="why-step-text">Keep coding</span>
+                                </div>
+                            </div>
+                            <div class="why-time accent">~2 seconds per reset</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Features</span>
+                <h2 class="display-text display-lg">EVERYTHING YOU NEED</h2>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-number">01</span>
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Instant Snapshots</h3>
+                    <p class="feature-desc">Save your complete SQLite database state with a single command. Perfect for capturing clean states before major changes.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-number">02</span>
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/>
+                            <path d="M3 3v9h9"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">One-Click Restore</h3>
+                    <p class="feature-desc">Rollback to any saved checkpoint instantly. No more manual database resets, migrations, or re-seeding data.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-number">03</span>
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Descriptive Notes</h3>
+                    <p class="feature-desc">Attach meaningful notes to checkpoints so you always remember what each state represents.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-number">04</span>
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Lock Protection</h3>
+                    <p class="feature-desc">Protect important checkpoints from accidental deletion with the lock feature. Your critical states stay safe.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-number">05</span>
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Batch Operations</h3>
+                    <p class="feature-desc">Flush all unlocked checkpoints at once or manage them individually with powerful CLI commands.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-number">06</span>
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Flexible Config</h3>
+                    <p class="feature-desc">Configure custom storage paths and behavior through environment variables or published config files.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMMANDS -->
+    <section class="section commands-section" id="commands">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">CLI Reference</span>
+                <h2 class="display-text display-lg">AVAILABLE COMMANDS</h2>
+            </div>
+            <div class="commands-grid">
+                <div class="command-block">
+                    <div class="command-label">Create Checkpoint</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:create [name]</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">List Checkpoints</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:list</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">Restore Checkpoint</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:restore [id|name]</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">Add Note</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:add-note [id]</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">Lock Checkpoint</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:lock [id]</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">Unlock Checkpoint</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:unlock [id]</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">Delete Checkpoint</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:delete [id]</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">Flush All</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:flush</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INSTALLATION -->
+    <section class="section install-section" id="install">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Installation</span>
+                <h2 class="display-text display-lg">GET STARTED</h2>
+            </div>
+            <div class="install-content">
+                <div class="install-step">
+                    <div class="install-step-title">
+                        <span class="install-step-number">1</span>
+                        Install via Composer
+                    </div>
+                    <div class="install-code">
+                        <span class="code-cmd">composer require tyrolabs/tyro-checkpoint</span>
+                    </div>
+                </div>
+                <div class="install-step">
+                    <div class="install-step-title">
+                        <span class="install-step-number">2</span>
+                        Publish Configuration (Optional)
+                    </div>
+                    <div class="install-code">
+                        <span class="code-cmd">php artisan tyro-checkpoint:publish-config</span>
+                    </div>
+                </div>
+                <div class="install-step">
+                    <div class="install-step-title">
+                        <span class="install-step-number">3</span>
+                        Start Creating Checkpoints
+                    </div>
+                    <div class="install-code">
+                        <span class="code-cmd">php artisan tyro-checkpoint:create my-first-checkpoint</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="https://tyrolabs.dev" class="logo">TYRO<span>LABS</span></a>
+                    <p class="footer-tagline">Tyro Checkpoint is brought to you by TyroLabs - Complete Auth & Admin Platform for Laravel</p>
+                    <a href="https://tyrolabs.dev" class="tyrolabs-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/>
+                            <line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                        Visit TyroLabs
+                    </a>
+                </div>
+                <div>
+                    <h4 class="footer-title">Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#commands">Commands</a></li>
+                        <li><a href="#install">Installation</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/tyrolabs/tyro-checkpoint">GitHub Repository</a></li>
+                        <li><a href="https://tyrolabs.dev">TyroLabs</a></li>
+                        <li><a href="https://packagist.org/packages/tyrolabs/tyro-checkpoint">Packagist</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2026 Tyro Labs. Open source under MIT License.</p>
+                <div class="footer-metro">
+                    <a href="https://tyrolabs.dev">tyrolabs.dev</a>
+                    <a href="https://github.com/tyrolabs">github.com/tyrolabs</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
