@@ -828,6 +828,129 @@
         .hero-subtitle { animation-delay: 0.3s; }
         .hero-cta { animation-delay: 0.4s; }
         .hero-code { animation-delay: 0.5s; }
+
+        /* ═══════════════════════════════════════════════════════════════
+           DEMO SECTION
+        ═══════════════════════════════════════════════════════════════ */
+        .demo-section {
+            background: var(--bg-secondary);
+        }
+
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .demo-visual {
+            position: relative;
+            background: var(--code-bg);
+            border: 1px solid var(--border-light);
+            padding: 2rem;
+        }
+
+        .demo-label {
+            position: absolute;
+            top: 0;
+            left: 2rem;
+            transform: translateY(-50%);
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .demo-diff {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.8125rem;
+        }
+
+        .diff-remove { color: #ff5f57; }
+        .diff-add { color: #28c940; }
+
+        @media (max-width: 1024px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           USE CASES SECTION (Updated to 3 columns)
+        ═══════════════════════════════════════════════════════════════ */
+        .use-cases {
+            background: var(--bg-primary);
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .use-case-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .use-case-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            padding: 2.5rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-direction: column;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .use-case-card-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .use-case-card-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .use-case-card-content p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .use-case-grid {
+                grid-template-columns: 1fr;
+            }
+            .use-case-card {
+                padding: 1.5rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -838,7 +961,9 @@
                 <a href="#" class="logo">TYRO<span>CHECKPOINT</span></a>
                 <div class="nav-links">
                     <a href="#features">Features</a>
+                    <a href="#use-cases">Use Cases</a>
                     <a href="#commands">Commands</a>
+                    <a href="doc.html">Documentation</a>
                     <a href="#install">Install</a>
                     <a href="https://github.com/hasinhayder/tyro-checkpoint" class="nav-cta" target="_blank">GitHub</a>
                 </div>
@@ -912,11 +1037,11 @@
                             </div>
                             <div class="code-line">
                                 <span class="line-num">06</span>
-                                <span class="line-code"><span class="code-comment"># Restore anytime</span></span>
+                                <span class="line-code"><span class="code-comment"># Encrypt your checkpoints</span></span>
                             </div>
                             <div class="code-line">
                                 <span class="line-num">07</span>
-                                <span class="line-code">$ <span class="code-cmd">php artisan tyro-checkpoint:restore</span> 1</span>
+                                <span class="line-code">$ <span class="code-cmd">php artisan tyro-checkpoint:create</span> secure-db --encrypt</span>
                             </div>
                             <div class="code-line">
                                 <span class="line-num">08</span>
@@ -924,6 +1049,18 @@
                             </div>
                             <div class="code-line">
                                 <span class="line-num">09</span>
+                                <span class="line-code"><span class="code-comment"># Restore anytime (auto-decrypts)</span></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">10</span>
+                                <span class="line-code">$ <span class="code-cmd">php artisan tyro-checkpoint:restore</span> 1</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">11</span>
+                                <span class="line-code"></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">12</span>
                                 <span class="line-code"><span class="code-comment">✓ Database restored to checkpoint #1</span></span>
                             </div>
                         </div>
@@ -1056,11 +1193,25 @@
                             <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
                         </svg>
                     </div>
+                    <h3 class="feature-title">Secure Encryption</h3>
+                    <p class="feature-desc">Encrypt your database snapshots with AES-256 for maximum security. Automatic decryption during restoration.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-number">05</span>
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                            <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+                            <path d="M16 4h2a2 2 0 0 1 2 2v4"/>
+                            <path d="M21 14H11"/>
+                            <path d="M15 10l-4 4 4 4"/>
+                        </svg>
+                    </div>
                     <h3 class="feature-title">Lock Protection</h3>
                     <p class="feature-desc">Protect important checkpoints from accidental deletion with the lock feature. Your critical states stay safe.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-number">05</span>
+                    <span class="feature-number">06</span>
                     <div class="feature-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"/>
@@ -1071,7 +1222,7 @@
                     <p class="feature-desc">Flush all unlocked checkpoints at once or manage them individually with powerful CLI commands.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-number">06</span>
+                    <span class="feature-number">07</span>
                     <div class="feature-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="3"/>
@@ -1080,6 +1231,119 @@
                     </div>
                     <h3 class="feature-title">Flexible Config</h3>
                     <p class="feature-desc">Configure custom storage paths and behavior through environment variables or published config files.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- USE CASES -->
+    <section class="section use-cases" id="use-cases">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Real World</span>
+                <h2 class="display-text display-lg">USE CASES</h2>
+            </div>
+            <div class="use-case-grid">
+                <div class="use-case-card">
+                    <div class="use-case-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 15L12 9M9 12L15 12"/>
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        </svg>
+                    </div>
+                    <div class="use-case-card-content">
+                        <h3>Golden Baselines</h3>
+                        <p>Create a clean state after your fresh install and seeding. Lock it to keep it safe, and restore to it anytime you want to start a new feature or experiment from scratch.</p>
+                    </div>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        </svg>
+                    </div>
+                    <div class="use-case-card-content">
+                        <h3>Migration Safety</h3>
+                        <p>Don't risk complex schema changes. Snapshot your database before running manual alterations or risky migrations. If things break, you're one command away from safety.</p>
+                    </div>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/>
+                            <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/>
+                        </svg>
+                    </div>
+                    <div class="use-case-card-content">
+                        <h3>Tinker & Repeat</h3>
+                        <p>Testing complex data mutations or API integrations? Perform your tests, observe the side effects, then restore to a fresh state and repeat the process in seconds.</p>
+                    </div>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <div class="use-case-card-content">
+                        <h3>Performance Benchmarking</h3>
+                        <p>Switch between small, medium, and massive datasets to test how your application behaves. Keep multiple versions of your data ready for instant swapping.</p>
+                    </div>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                    </div>
+                    <div class="use-case-card-content">
+                        <h3>Education & Workshops</h3>
+                        <p>Perfect for classroom presentations. Modify data live to demonstrate features, then reset to a clean state instantly for the next take or group.</p>
+                    </div>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <div class="use-case-card-content">
+                        <h3>Automated Testing</h3>
+                        <p>Snapshot your "Perfect Test Data" and restore it before running each test suite to ensure consistent, idempotent results every single time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE DEMO SHOWCASE -->
+    <section class="section demo-section" id="demo">
+        <div class="container">
+            <div class="demo-container">
+                <div>
+                    <span class="section-label">Live Presentation</span>
+                    <h2 class="display-text display-md">THE PERFECT DEMO</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Stop worrying about "messing up" your demo environment. Tyro Checkpoint allows you to perform destructive modifications live, and then return to your golden state in under 2 seconds. No more re-seeding between takes.</p>
+                    
+                    <div class="why-list" style="margin-bottom: 0;">
+                        <li><strong>Live Coding:</strong> Delete records to show error handling.</li>
+                        <li><strong>Instant Recovery:</strong> One command and the data is back.</li>
+                        <li><strong>Consistency:</strong> Every student sees the exact same starting point.</li>
+                    </div>
+                </div>
+                <div class="demo-visual">
+                    <span class="demo-label">Scenario: Classroom Presentation</span>
+                    <div class="demo-diff">
+                        <div class="diff-remove">- User::find(1)->delete(); // OOPS! Deleted the admin</div>
+                        <div class="diff-remove">- DB::table('orders')->truncate(); // Gone!</div>
+                        <div style="color: var(--text-muted); margin: 0.5rem 0;">... live presentation continues ...</div>
+                        <div class="code-cmd">$ php artisan tyro-checkpoint:restore 1</div>
+                        <div class="diff-add">+ [RESTORED] 1,240 Users recovered</div>
+                        <div class="diff-add">+ [RESTORED] 5,820 Orders recovered</div>
+                        <div class="diff-add">+ ✓ Ready for next presentation</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1149,6 +1413,20 @@
                         <span>php artisan tyro-checkpoint:flush</span>
                     </div>
                 </div>
+                <div class="command-block">
+                    <div class="command-label">Generate Key</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:generate-key</span>
+                    </div>
+                </div>
+                <div class="command-block">
+                    <div class="command-label">Check Version</div>
+                    <div class="command-line">
+                        <span class="command-prompt">$</span>
+                        <span>php artisan tyro-checkpoint:version</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1212,6 +1490,8 @@
                     <h4 class="footer-title">Product</h4>
                     <ul class="footer-links">
                         <li><a href="#features">Features</a></li>
+                        <li><a href="#use-cases">Use Cases</a></li>
+                        <li><a href="doc.html">Documentation</a></li>
                         <li><a href="#commands">Commands</a></li>
                         <li><a href="#install">Installation</a></li>
                     </ul>
