@@ -29,6 +29,32 @@
             --sidebar-width: 280px;
         }
 
+        /* Modern Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--bg-primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Firefox Support */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-tertiary) var(--bg-primary);
+        }
+
         html {
             scroll-behavior: smooth;
         }
@@ -287,7 +313,8 @@
             </div>
             <div class="sidebar-group">
                 <div class="sidebar-title">Advanced</div>
-                <a href="#encryption" class="sidebar-item">Encryption</a>
+                <a href="#why-encryption" class="sidebar-item">Why Encryption Matters?</a>
+                <a href="#encryption" class="sidebar-item">Encryption Guide</a>
                 <a href="#configuration" class="sidebar-item">Configuration</a>
             </div>
         </aside>
@@ -330,6 +357,24 @@
                     <li><strong>Instant Swap:</strong> Restoring a checkpoint simply replaces your current database file with the saved snapshot.</li>
                     <li><strong>Encryption:</strong> Optional file-level encryption using AES-256-CBC.</li>
                 </ol>
+            </section>
+
+            <section id="checkpoints">
+                <h2>What are Checkpoints?</h2>
+                <p>A checkpoint is a point-in-time snapshot of your entire SQLite database. Unlike traditional migrations or SQL dumps, a checkpoint captures the exact state of your data and schema at a specific moment.</p>
+                
+                <h3>Anatomy of a Checkpoint</h3>
+                <ul>
+                    <li><strong>Database Snapshot:</strong> A physical copy of your <code>database.sqlite</code> file, optionally encrypted.</li>
+                    <li><strong>Metadata:</strong> A JSON record containing the checkpoint name, ID, creation timestamp, optional notes, and encryption status.</li>
+                </ul>
+
+                <h3>Storage</h3>
+                <p>By default, all checkpoints are stored in <code>storage/tyro-checkpoints/</code>. This directory contains both the snapshot files (<code>.sqlite</code>) and the metadata registry (<code>checkpoints.json</code>).</p>
+                
+                <div class="note">
+                    <p><strong>Pro Tip:</strong> You can version control certain checkpoints or exclude the entire directory from your Git repository depending on your team's workflow.</p>
+                </div>
             </section>
 
             <section id="create">
@@ -375,6 +420,23 @@ php artisan tyro-checkpoint:restore initial_state</code></pre>
                 
                 <p>To enable deletion again, unlock it:</p>
                 <pre><code>php artisan tyro-checkpoint:unlock 1</code></pre>
+            </section>
+
+            <section id="why-encryption">
+                <h2>Why Encryption Matters</h2>
+                <p>When working with local development databases, developers often use production-like data or sensitive PII (Personally Identifiable Information). Tyro Checkpoint's encryption ensures that your data remains safe, even if your snapshots are shared or stored in insecure locations.</p>
+                
+                <h3>Key Benefits</h3>
+                <ul>
+                    <li><strong>Data Privacy:</strong> Protects sensitive user data (emails, passwords, personal details) within your SQLite snapshots.</li>
+                    <li><strong>Compliance:</strong> Helps meet security standards and internal policies regarding data handling during development.</li>
+                    <li><strong>Safe Sharing:</strong> Encrypted snapshots can be shared with teammates more securely when the encryption key is managed properly.</li>
+                    <li><strong>Zero Overhead:</strong> AES-256 encryption is blazingly fast on modern hardware, adding negligible time to the snapshot process.</li>
+                </ul>
+
+                <div class="note" style="border-left-color: #ff6b00; background: rgba(255, 107, 0, 0.05);">
+                    <p><strong>Note:</strong> Encryption is handled at the file level. Once a snapshot is encrypted, it cannot be opened by standard SQLite browsers without first being decrypted by Tyro Checkpoint during restoration.</p>
+                </div>
             </section>
 
             <section id="encryption">
