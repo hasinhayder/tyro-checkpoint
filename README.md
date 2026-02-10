@@ -12,6 +12,7 @@ Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint fu
 -  Delete old checkpoints to save disk space
 -  **Lock checkpoints** to prevent accidental deletion
 -  **Add notes** to checkpoints for better organization
+-  **Encryption support** to secure your database snapshots
 -  SQLite only (perfect for local development)
 -  Simple and production-safe
 -  No configuration required
@@ -48,6 +49,16 @@ That's it! You're ready to create checkpoints.
 
 **Note**: No database migrations are needed as checkpoint metadata is stored in a JSON file.
 
+### Optional: Encryption
+
+If you want to secure your checkpoints, you can generate an encryption key:
+
+```bash
+php artisan tyro-checkpoint:generate-key
+```
+
+This will add a secure `TYRO_CHECKPOINT_ENCRYPTION_KEY` to your `.env` file. If a key already exists, the command will warn you before replacing it.
+
 ### Optional: Publish Configuration
 
 Publish the configuration file to customize settings:
@@ -74,6 +85,12 @@ Create a checkpoint with a custom name:
 php artisan tyro-checkpoint:create my_feature_before_changes
 ```
 
+Create an **encrypted** checkpoint:
+
+```bash
+php artisan tyro-checkpoint:create secure_snapshot --encrypt
+```
+
 Example output:
 ```
 Creating checkpoint...
@@ -97,13 +114,13 @@ Example output:
 ```
 Found 3 checkpoint(s):
 
-+----+---------------------------+---------+---------------------+--------+-------+
-| ID | Name                      | Size    | Created At          | Locked | Note  |
-+----+---------------------------+---------+---------------------+--------+-------+
-| 3  | before_user_migration     | 2.48 MB | 2026-02-01 14:20:00 | No     |       |
-| 2  | after_seeding             | 2.45 MB | 2026-02-01 12:15:30 | Yes    | Clean |
-| 1  | clean_database            | 1.98 MB | 2026-02-01 10:00:00 | No     |       |
-+----+---------------------------+---------+---------------------+--------+-------+
++----+---------------------------+---------+---------------------+--------+-----------+-------+
+| ID | Name                      | Size    | Created At          | Locked | Encrypted | Note  |
++----+---------------------------+---------+---------------------+--------+-----------+-------+
+| 3  | before_user_migration     | 2.48 MB | 2026-02-01 14:20:00 | No     | No        |       |
+| 2  | after_seeding             | 2.45 MB | 2026-02-01 12:15:30 | Yes    | Yes       | Clean |
+| 1  | clean_database            | 1.98 MB | 2026-02-01 10:00:00 | No     | No        |       |
++----+---------------------------+---------+---------------------+--------+-----------+-------+
 ```
 
 ### Restore a Checkpoint
@@ -120,18 +137,23 @@ Or restore by name:
 php artisan tyro-checkpoint:restore clean_database
 ```
 
-You'll be asked to confirm before the restore happens:
+You'll be asked to confirm before the restore happens. If no identifier is provided, you can choose from a list:
 
 ```
-⚠ WARNING: This will replace your current database!
+Available checkpoints:
 
-Checkpoint to restore:
-  ID:      1
-  Name:    clean_database
-  Size:    1.98 MB
-  Created: 2026-02-01 10:00:00
++----+---------------------------+---------+---------------------+-----------+-------+
+| ID | Name                      | Size    | Created At          | Encrypted | Note  |
++----+---------------------------+---------+---------------------+-----------+-------+
+| 2  | after_seeding             | 2.45 MB | 2026-02-01 12:15:30 | Yes       | Clean |
+| 1  | clean_database            | 1.98 MB | 2026-02-01 10:00:00 | No        |       |
++----+---------------------------+---------+---------------------+-----------+-------+
 
-Do you want to proceed? (yes/no) [no]:
+Select a checkpoint to restore (enter 0 to quit):
+  [0] Quit
+  [1] #2 - after_seeding (encrypted) (Note: Clean)
+  [2] #1 - clean_database
+ > 
 ```
 
 **Important**: Checkpoints are NOT deleted after restoration. You can restore the same checkpoint multiple times, allowing you to experiment with different approaches and always return to the same state.
@@ -237,6 +259,7 @@ php artisan tyro-checkpoint:flush --force
 5. **Persistent checkpoints**: Checkpoints are NOT automatically deleted after restoration. You can restore the same checkpoint multiple times and must manually delete checkpoints when no longer needed.
 6. **Safe restoration**: Because metadata is stored outside the database, you never lose track of any checkpoint, even when restoring to an earlier state
 7. **Lock protection**: Locked checkpoints are protected from deletion to preserve important baseline states
+8. **Automatic Decryption**: If a checkpoint is encrypted, the restore command will automatically decrypt it using your `TYRO_CHECKPOINT_ENCRYPTION_KEY` before replacing your database.
 
 ## Common Use Cases
 
@@ -302,10 +325,9 @@ php artisan tyro-checkpoint:version
 ```
 
 This shows:
-- Package version
+- Package version and history
 - Laravel and PHP versions
-- Database driver and configuration
-- Checkpoint storage statistics
+- Documentation and GitHub links
 
 ### Installation Command
 
@@ -361,6 +383,9 @@ The published configuration file (`config/tyro-checkpoint.php`) allows you to cu
 return [
     // Custom storage path for checkpoints
     'storage_path' => storage_path('tyro-checkpoints'),
+
+    // Encryption key (automatically set via artisan tyro-checkpoint:generate-key)
+    'encryption_key' => env('TYRO_CHECKPOINT_ENCRYPTION_KEY'),
 ];
 ```
 
@@ -375,6 +400,7 @@ return [
 - **Manual cleanup required**: Use `php artisan tyro-checkpoint:delete` or `php artisan tyro-checkpoint:flush` to remove checkpoints you no longer need.
 - **Disk space**: Each checkpoint is a full copy of your database, so they can consume disk space. Delete old checkpoints you no longer need.
 - **Locked checkpoints**: Locked checkpoints are protected from deletion. Use this to preserve important baseline states.
+- **Encryption**: Encrypting checkpoints secures the database snapshots. Ensure you back up your `TYRO_CHECKPOINT_ENCRYPTION_KEY`, as losing it will make all encrypted checkpoints impossible to restore. Replacing a key will also invalidate older encrypted checkpoints.
 
 ## Error Handling
 
