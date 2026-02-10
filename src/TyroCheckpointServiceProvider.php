@@ -13,6 +13,7 @@ use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointInstallCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointAddNoteCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\LockCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\UnlockCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointGenerateKeyCommand;
 
 class TyroCheckpointServiceProvider extends ServiceProvider
 {
@@ -48,6 +49,7 @@ class TyroCheckpointServiceProvider extends ServiceProvider
                 CheckpointAddNoteCommand::class,
                 LockCommand::class,
                 UnlockCommand::class,
+                CheckpointGenerateKeyCommand::class,
             ]);
         }
     }

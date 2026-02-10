@@ -21,6 +21,7 @@ use Carbon\Carbon;
  * @property Carbon $created_at
  * @property bool $locked
  * @property string|null $note
+ * @property bool $encrypted
  */
 class Checkpoint
 {
@@ -60,6 +61,11 @@ class Checkpoint
     public ?string $note;
 
     /**
+     * Whether the checkpoint is encrypted
+     */
+    public bool $encrypted;
+
+    /**
      * Create a new Checkpoint instance from array data.
      */
     public function __construct(array $data)
@@ -73,6 +79,7 @@ class Checkpoint
             : $data['created_at'];
         $this->locked = $data['locked'] ?? false;
         $this->note = $data['note'] ?? null;
+        $this->encrypted = $data['encrypted'] ?? false;
     }
 
     /**
@@ -88,6 +95,7 @@ class Checkpoint
             'created_at' => $this->created_at->toIso8601String(),
             'locked' => $this->locked,
             'note' => $this->note,
+            'encrypted' => $this->encrypted,
         ];
     }
 

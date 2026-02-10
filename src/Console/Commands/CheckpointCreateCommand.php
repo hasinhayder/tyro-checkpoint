@@ -20,7 +20,7 @@ class CheckpointCreateCommand extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:create {name? : Optional name for the checkpoint} {--note= : Optional note for the checkpoint}';
+    protected $signature = 'tyro-checkpoint:create {name? : Optional name for the checkpoint} {--note= : Optional note for the checkpoint} {--encrypt : Encrypt the checkpoint}';
 
     /**
      * The console command description.
@@ -36,12 +36,13 @@ class CheckpointCreateCommand extends Command
             // Get the checkpoint name from argument
             $name = $this->argument('name');
             $note = $this->option('note');
+            $encrypt = $this->option('encrypt');
 
             // Show info message
-            $this->info('Creating checkpoint...');
+            $this->info($encrypt ? 'Creating encrypted checkpoint...' : 'Creating checkpoint...');
 
             // Create the checkpoint
-            $checkpoint = $service->create($name, $note);
+            $checkpoint = $service->create($name, $note, $encrypt);
 
             // Success message
             $this->info("✓ Checkpoint created successfully!");
@@ -50,6 +51,9 @@ class CheckpointCreateCommand extends Command
             $this->line("  Name:    {$checkpoint->name}");
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
+            if ($checkpoint->encrypted) {
+                $this->line("  Status:  <comment>Encrypted</comment>");
+            }
 
             // If no note was provided via option, ask if user wants to add one now
             if (!$note) {

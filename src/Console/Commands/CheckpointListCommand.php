@@ -58,11 +58,12 @@ class CheckpointListCommand extends Command
                     $checkpoint->note ?? '-',
                     $service->formatFileSize($checkpoint->size),
                     $checkpoint->created_at->format('Y-m-d H:i:s'),
+                    $checkpoint->encrypted ? 'Yes' : 'No',
                 ];
             })->toArray();
 
             $this->table(
-                ['ID', 'Name', 'Note', 'Size', 'Created At'],
+                ['ID', 'Name', 'Note', 'Size', 'Created At', 'Encrypted'],
                 $rows
             );
 

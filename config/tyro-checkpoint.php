@@ -14,4 +14,17 @@ return [
     */
 
     'storage_path' => env('TYRO_CHECKPOINT_STORAGE_PATH', storage_path('tyro-checkpoints')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tyro Checkpoint Encryption Key
+    |--------------------------------------------------------------------------
+    |
+    | This value is used by the Tyro Checkpoint command to encrypt your
+    | database checkpoints. You can generate a new key using the
+    | `tyro-checkpoint:generate-key` command.
+    |
+    */
+
+    'encryption_key' => env('TYRO_CHECKPOINT_ENCRYPTION_KEY'),
 ];

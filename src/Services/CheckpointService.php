@@ -4,6 +4,7 @@ namespace HasinHayder\TyroCheckpoint\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Encryption\Encrypter;
 use HasinHayder\TyroCheckpoint\Models\Checkpoint;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 
@@ -124,12 +125,23 @@ class CheckpointService
      *
      * @param string|null $name Optional checkpoint name
      * @param string|null $note Optional note for the checkpoint
+     * @param bool $encrypt Whether to encrypt the checkpoint
      * @return Checkpoint
      * @throws CheckpointException
      */
-    public function create(?string $name = null, ?string $note = null): Checkpoint
+    public function create(?string $name = null, ?string $note = null, bool $encrypt = false): Checkpoint
     {
         $this->ensureStorageDirectoryExists();
+
+        // Check if encryption is requested
+        if ($encrypt) {
+            $encryptionKey = $this->getEncryptionKey();
+            if (!$encryptionKey) {
+                throw new CheckpointException(
+                    "Encryption key not found in the config or env file. Please run 'php artisan tyro-checkpoint:generate-key' first."
+                );
+            }
+        }
 
         // Generate checkpoint name if not provided
         if (!$name) {
@@ -154,8 +166,14 @@ class CheckpointService
         // Create checkpoint file path
         $checkpointPath = $this->getCheckpointStoragePath() . '/' . $name . '.sqlite';
 
-        // Copy the database file to create the checkpoint
-        if (!File::copy($sourcePath, $checkpointPath)) {
+        // Copy/Encrypt the database file to create the checkpoint
+        if ($encrypt) {
+            if (!$this->encryptFile($sourcePath, $checkpointPath)) {
+                throw new CheckpointException(
+                    "Failed to create encrypted checkpoint file: {$checkpointPath}"
+                );
+            }
+        } elseif (!File::copy($sourcePath, $checkpointPath)) {
             throw new CheckpointException(
                 "Failed to create checkpoint file: {$checkpointPath}"
             );
@@ -182,6 +200,7 @@ class CheckpointService
             'created_at' => now()->toIso8601String(),
             'locked' => false, // New checkpoints are not locked by default
             'note' => $note,
+            'encrypted' => $encrypt,
         ];
 
         // Add to checkpoints array
@@ -264,7 +283,13 @@ class CheckpointService
         DB::disconnect();
 
         // Replace the current database with the checkpoint
-        if (!File::copy($checkpoint->path, $databasePath)) {
+        if ($checkpoint->encrypted) {
+            if (!$this->decryptFile($checkpoint->path, $databasePath)) {
+                throw new CheckpointException(
+                    "Failed to restore encrypted checkpoint. Could not decrypt file to: {$databasePath}"
+                );
+            }
+        } elseif (!File::copy($checkpoint->path, $databasePath)) {
             throw new CheckpointException(
                 "Failed to restore checkpoint. Could not copy file to: {$databasePath}"
             );
@@ -446,6 +471,56 @@ class CheckpointService
 
         // Return updated checkpoint
         return new Checkpoint($checkpoints[array_search($checkpoint->id, array_column($checkpoints, 'id'))]);
+    }
+
+    /**
+     * Get the encryption key from config.
+     */
+    protected function getEncryptionKey(): ?string
+    {
+        return config('tyro-checkpoint.encryption_key');
+    }
+
+    /**
+     * Encrypt a file.
+     */
+    protected function encryptFile(string $sourcePath, string $destinationPath): bool
+    {
+        $key = $this->getEncryptionKey();
+        $encrypter = new Encrypter($key, config('app.cipher', 'AES-256-CBC'));
+
+        $content = File::get($sourcePath);
+        $encryptedContent = $encrypter->encrypt($content);
+
+        return File::put($destinationPath, $encryptedContent) !== false;
+    }
+
+    /**
+     * Decrypt a file.
+     */
+    protected function decryptFile(string $sourcePath, string $destinationPath): bool
+    {
+        $key = $this->getEncryptionKey();
+        
+        if (!$key) {
+             throw new CheckpointException(
+                "Encryption key not found. Cannot decrypt checkpoint."
+            );
+        }
+
+        $encrypter = new Encrypter($key, config('app.cipher', 'AES-256-CBC'));
+
+        $content = File::get($sourcePath);
+        
+        try {
+            $decryptedContent = $encrypter->decrypt($content);
+        } catch (\Exception $e) {
+            throw new CheckpointException(
+                "Failed to decrypt checkpoint. The encryption key might be incorrect."
+            );
+        }
+
+        return File::put($destinationPath, $decryptedContent) !== false;
     }
 
     /**

@@ -48,12 +48,15 @@ class CheckpointRestoreCommand extends Command
                 $this->info('Available checkpoints:');
                 $this->line('');
 
-                $options = [];
+                $options = [0 => 'Quit'];
                 $indexMap = [];
                 $index = 1;
 
                 foreach ($checkpoints as $checkpoint) {
                     $label = "#{$checkpoint->id} - {$checkpoint->name}";
+                    if ($checkpoint->encrypted) {
+                        $label .= " (encrypted)";
+                    }
                     if ($checkpoint->note) {
                         $label .= " (Note: {$this->truncateNote($checkpoint->note)})";
                     }
@@ -63,17 +66,23 @@ class CheckpointRestoreCommand extends Command
                 }
 
                 // Display table of checkpoints
-                $headers = ['#', 'Name', 'Note', 'Size', 'Created'];
+                $headers = ['#', 'Name', 'Note', 'Size', 'Created', 'Encrypted'];
                 $rows = $this->formatTableRows($checkpoints, $service);
                 $this->table($headers, $rows);
 
                 $selectedLabel = $this->choice(
-                    'Select a checkpoint to restore',
+                    'Select a checkpoint to restore (enter 0 to quit)',
                     $options,
+                    0,
                     null,
-                    null,
-                    false // Allow multiple selections to be disabled
+                    false
                 );
+
+                // Handle Quit option
+                if ($selectedLabel === 'Quit' || $selectedLabel === '0') {
+                    $this->info('Operation cancelled.');
+                    return self::SUCCESS;
+                }
 
                 // Find the index that corresponds to the selected label
                 $selectedIndex = array_search($selectedLabel, $options);
@@ -104,6 +113,9 @@ class CheckpointRestoreCommand extends Command
             $this->line("  Name:    {$checkpoint->name}");
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
+            if ($checkpoint->encrypted) {
+                $this->line("  Status:  <comment>Encrypted</comment>");
+            }
             if ($checkpoint->note) {
                 $this->line("  Note:    {$checkpoint->note}");
             }
@@ -161,7 +173,8 @@ class CheckpointRestoreCommand extends Command
                 $checkpoint->name,
                 $checkpoint->note ? $this->truncateNote($checkpoint->note, 20) : '<comment>No note</comment>',
                 $service->formatFileSize($checkpoint->size),
-                $checkpoint->created_at->format('Y-m-d H:i:s')
+                $checkpoint->created_at->format('Y-m-d H:i:s'),
+                $checkpoint->encrypted ? '<comment>Yes</comment>' : 'No'
             ];
 
             $rows[] = $row;
