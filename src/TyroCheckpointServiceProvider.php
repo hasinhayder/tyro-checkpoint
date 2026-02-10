@@ -8,7 +8,7 @@ use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointListCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointRestoreCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointDeleteCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointFlushCommand;
-use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointVersionCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\VersionCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointInstallCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointAddNoteCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\LockCommand;
@@ -44,7 +44,7 @@ class TyroCheckpointServiceProvider extends ServiceProvider
                 CheckpointRestoreCommand::class,
                 CheckpointDeleteCommand::class,
                 CheckpointFlushCommand::class,
-                CheckpointVersionCommand::class,
+                VersionCommand::class,
                 CheckpointInstallCommand::class,
                 CheckpointAddNoteCommand::class,
                 LockCommand::class,
