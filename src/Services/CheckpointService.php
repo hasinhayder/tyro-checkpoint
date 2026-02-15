@@ -10,15 +10,90 @@ use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 
 /**
  * CheckpointService
- * 
+ *
  * Handles all checkpoint operations: create, list, restore, and delete.
  * Works exclusively with SQLite databases for local development.
- * 
+ *
  * Checkpoint metadata is stored in a JSON file outside the database
  * to prevent loss of checkpoint history when restoring.
  */
 class CheckpointService
 {
+    /**
+     * Maximum allowed length for checkpoint names.
+     */
+    public const MAX_NAME_LENGTH = 255;
+
+    /**
+     * Maximum allowed length for checkpoint notes.
+     */
+    public const MAX_NOTE_LENGTH = 1000;
+
+    /**
+     * Validate a checkpoint name for security.
+     *
+     * @param string $name
+     * @return void
+     * @throws CheckpointException
+     */
+    protected function validateCheckpointName(string $name): void
+    {
+        // Check length
+        if (strlen($name) > self::MAX_NAME_LENGTH) {
+            throw new CheckpointException(
+                "Checkpoint name exceeds maximum length of " . self::MAX_NAME_LENGTH . " characters."
+            );
+        }
+
+        // Whitelist validation: only alphanumeric, underscores, and hyphens
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $name)) {
+            throw new CheckpointException(
+                "Invalid checkpoint name '{$name}'. Use only letters, numbers, underscores, and hyphens."
+            );
+        }
+    }
+
+    /**
+     * Validate a checkpoint note for security.
+     *
+     * @param string|null $note
+     * @return void
+     * @throws CheckpointException
+     */
+    protected function validateCheckpointNote(?string $note): void
+    {
+        if ($note !== null && strlen($note) > self::MAX_NOTE_LENGTH) {
+            throw new CheckpointException(
+                "Checkpoint note exceeds maximum length of " . self::MAX_NOTE_LENGTH . " characters."
+            );
+        }
+    }
+
+    /**
+     * Validate that a checkpoint path is within the allowed storage directory.
+     * This prevents path traversal attacks.
+     *
+     * @param string $checkpointPath
+     * @return void
+     * @throws CheckpointException
+     */
+    protected function validateCheckpointPath(string $checkpointPath): void
+    {
+        $storagePath = realpath($this->getCheckpointStoragePath());
+        $realCheckpointPath = realpath(dirname($checkpointPath));
+
+        // If storage directory doesn't exist yet, allow it (will be created)
+        if ($storagePath === false) {
+            return;
+        }
+
+        // Check if the checkpoint path is within storage
+        if ($realCheckpointPath !== false && !str_starts_with($realCheckpointPath, $storagePath)) {
+            throw new CheckpointException(
+                "Invalid checkpoint path detected. Path traversal attempt blocked."
+            );
+        }
+    }
     /**
      * Get the path to the checkpoint storage directory.
      */
@@ -38,11 +113,15 @@ class CheckpointService
 
     /**
      * Load all checkpoints from the JSON file.
+     * Automatically attempts to restore from backup if the main file is corrupted.
+     *
+     * @return array
+     * @throws CheckpointException
      */
     protected function loadCheckpoints(): array
     {
         $filePath = $this->getCheckpointsFilePath();
-        
+
         if (!File::exists($filePath)) {
             return [];
         }
@@ -51,8 +130,24 @@ class CheckpointService
         $data = json_decode($json, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
+            // Main file is corrupted - try to restore from backup
+            $backupPath = $this->getBackupFilePath();
+
+            if (File::exists($backupPath)) {
+                $backupJson = File::get($backupPath);
+                $backupData = json_decode($backupJson, true);
+
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    // Backup is valid - restore it
+                    File::copy($backupPath, $filePath);
+                    return $backupData ?? [];
+                }
+            }
+
+            // No valid backup available
             throw new CheckpointException(
-                'Failed to parse checkpoints file: ' . json_last_error_msg()
+                'Checkpoints file is corrupted and no valid backup exists. ' .
+                'You may need to delete the corrupted file and start fresh.'
             );
         }
 
@@ -60,18 +155,141 @@ class CheckpointService
     }
 
     /**
-     * Save checkpoints to the JSON file.
+     * Save checkpoints to the JSON file using atomic write.
+     * This ensures the JSON file is never left in a corrupted state.
+     *
+     * @param array $checkpoints
+     * @return void
+     * @throws CheckpointException
      */
     protected function saveCheckpoints(array $checkpoints): void
     {
         $filePath = $this->getCheckpointsFilePath();
+
+        // Create backup before modification (if original exists)
+        $this->createBackup();
+
+        // Encode to JSON
         $json = json_encode($checkpoints, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-        if (!File::put($filePath, $json)) {
+        if ($json === false) {
             throw new CheckpointException(
-                "Failed to save checkpoints file: {$filePath}"
+                'Failed to encode checkpoints to JSON: ' . json_last_error_msg()
             );
         }
+
+        // Validate that the encoded JSON can be decoded back (sanity check)
+        $decoded = json_decode($json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new CheckpointException(
+                'JSON validation failed: encoded data is not valid JSON'
+            );
+        }
+
+        // Use atomic write: write to temp file first, then rename
+        $tempFile = $filePath . '.tmp.' . uniqid();
+
+        try {
+            // Write to temporary file
+            if (File::put($tempFile, $json) === false) {
+                throw new CheckpointException(
+                    "Failed to write temporary checkpoints file: {$tempFile}"
+                );
+            }
+
+            // Atomic rename (on most filesystems, rename is atomic)
+            if (!rename($tempFile, $filePath)) {
+                throw new CheckpointException(
+                    "Failed to save checkpoints file: could not rename temp file to {$filePath}"
+                );
+            }
+        } finally {
+            // Clean up temp file if it still exists (in case of failure)
+            if (File::exists($tempFile)) {
+                @unlink($tempFile);
+            }
+        }
+    }
+
+    /**
+     * Create a backup of the current checkpoints file before modification.
+     *
+     * @return void
+     */
+    protected function createBackup(): void
+    {
+        $filePath = $this->getCheckpointsFilePath();
+        $backupPath = $this->getBackupFilePath();
+
+        // Only backup if original file exists and is valid
+        if (!File::exists($filePath)) {
+            return;
+        }
+
+        // Verify the current file is valid JSON before backing up
+        $content = File::get($filePath);
+        json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Current file is corrupted - don't backup, let operation proceed
+            // which will overwrite with valid data
+            return;
+        }
+
+        // Create backup (overwrites previous backup)
+        File::copy($filePath, $backupPath);
+    }
+
+    /**
+     * Get the path to the backup file.
+     *
+     * @return string
+     */
+    protected function getBackupFilePath(): string
+    {
+        return $this->getCheckpointStoragePath() . '/checkpoints.json.bak';
+    }
+
+    /**
+     * Restore checkpoints from backup if available.
+     * This is a public method that can be called for recovery.
+     *
+     * @return bool True if restored successfully, false if no backup exists
+     * @throws CheckpointException
+     */
+    public function restoreFromBackup(): bool
+    {
+        $backupPath = $this->getBackupFilePath();
+        $filePath = $this->getCheckpointsFilePath();
+
+        if (!File::exists($backupPath)) {
+            return false;
+        }
+
+        // Validate backup is valid JSON
+        $content = File::get($backupPath);
+        $data = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new CheckpointException(
+                'Backup file is corrupted and cannot be restored.'
+            );
+        }
+
+        // Restore from backup
+        File::copy($backupPath, $filePath);
+
+        return true;
+    }
+
+    /**
+     * Check if a backup exists.
+     *
+     * @return bool
+     */
+    public function hasBackup(): bool
+    {
+        return File::exists($this->getBackupFilePath());
     }
 
     /**
@@ -148,6 +366,12 @@ class CheckpointService
             $name = 'checkpoint_' . date('Y_m_d_His');
         }
 
+        // Validate checkpoint name for security (prevents path traversal)
+        $this->validateCheckpointName($name);
+
+        // Validate note length
+        $this->validateCheckpointNote($note);
+
         // Load existing checkpoints
         $checkpoints = $this->loadCheckpoints();
 
@@ -165,6 +389,9 @@ class CheckpointService
 
         // Create checkpoint file path
         $checkpointPath = $this->getCheckpointStoragePath() . '/' . $name . '.sqlite';
+
+        // Validate the checkpoint path is within storage (defense in depth)
+        $this->validateCheckpointPath($checkpointPath);
 
         // Copy/Encrypt the database file to create the checkpoint
         if ($encrypt) {
@@ -253,7 +480,7 @@ class CheckpointService
 
     /**
      * Restore a checkpoint by replacing the current database with it.
-     * 
+     *
      * @param string $identifier Checkpoint ID or name
      * @return Checkpoint
      * @throws CheckpointException
@@ -275,6 +502,9 @@ class CheckpointService
                 "Checkpoint file not found: {$checkpoint->path}"
             );
         }
+
+        // Validate the checkpoint path is within storage directory (security check)
+        $this->validateCheckpointPath($checkpoint->path);
 
         // Get current database path
         $databasePath = $this->getDatabasePath();
@@ -325,6 +555,9 @@ class CheckpointService
                 "Cannot delete locked checkpoint: {$identifier}. Please unlock it first."
             );
         }
+
+        // Validate the checkpoint path is within storage directory (security check)
+        $this->validateCheckpointPath($checkpoint->path);
 
         // Delete the checkpoint file if it exists
         if (File::exists($checkpoint->path)) {
@@ -447,6 +680,9 @@ class CheckpointService
                 "Checkpoint not found: {$identifier}"
             );
         }
+
+        // Validate note length
+        $this->validateCheckpointNote($note);
 
         // Load checkpoints and update the matching one
         $checkpoints = $this->loadCheckpoints();

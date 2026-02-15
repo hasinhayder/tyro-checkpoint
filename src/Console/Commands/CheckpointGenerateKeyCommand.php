@@ -43,7 +43,7 @@ class CheckpointGenerateKeyCommand extends Command
 
         if ($this->writeNewEnvironmentFileWith($key)) {
             $this->info("✓ Encryption key generated and saved to .env file successfully.");
-            $this->line("  Key: {$key}");
+            $this->line("  Run 'php artisan tyro-checkpoint:create --encrypt' to create encrypted checkpoints.");
         } else {
             $this->error("✗ Failed to save encryption key to .env file.");
             $this->line("  Please add the following line manually to your .env file:");
