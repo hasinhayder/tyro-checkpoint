@@ -8,10 +8,11 @@ use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 
 /**
  * CheckpointRestoreCommand
- * 
+ *
  * Restores a database checkpoint by replacing the current database file.
- * 
+ *
  * Usage:
+ *   php artisan tyro-checkpoint:restore
  *   php artisan tyro-checkpoint:restore 1
  *   php artisan tyro-checkpoint:restore my_checkpoint
  */
@@ -48,50 +49,30 @@ class CheckpointRestoreCommand extends Command
                 $this->info('Available checkpoints:');
                 $this->line('');
 
-                $options = [0 => 'Quit'];
-                $indexMap = [];
-                $index = 1;
-
-                foreach ($checkpoints as $checkpoint) {
-                    $label = "#{$checkpoint->id} - {$checkpoint->name}";
-                    if ($checkpoint->encrypted) {
-                        $label .= " (encrypted)";
-                    }
-                    if ($checkpoint->note) {
-                        $label .= " (Note: {$this->truncateNote($checkpoint->note)})";
-                    }
-                    $options[$index] = $label;
-                    $indexMap[$index] = $checkpoint->id;
-                    $index++;
-                }
-
                 // Display table of checkpoints
-                $headers = ['#', 'Name', 'Note', 'Size', 'Created', 'Encrypted'];
+                $headers = ['ID', 'Name', 'Note', 'Size', 'Created', 'Encrypted'];
                 $rows = $this->formatTableRows($checkpoints, $service);
                 $this->table($headers, $rows);
 
-                $selectedLabel = $this->choice(
-                    'Select a checkpoint to restore (enter 0 to quit)',
-                    $options,
-                    0,
-                    null,
-                    false
-                );
+                // Get available IDs for validation
+                $availableIds = $checkpoints->pluck('id')->toArray();
 
-                // Handle Quit option
-                if ($selectedLabel === 'Quit' || $selectedLabel === '0') {
+                $this->line('');
+                $input = $this->ask('Enter checkpoint ID to restore (0 to quit)');
+
+                // Handle quit
+                if ($input === '0' || $input === 0) {
                     $this->info('Operation cancelled.');
                     return self::SUCCESS;
                 }
 
-                // Find the index that corresponds to the selected label
-                $selectedIndex = array_search($selectedLabel, $options);
-                $identifier = $indexMap[$selectedIndex] ?? null;
-
-                if (!$identifier) {
-                    $this->error('✗ No checkpoint selected.');
+                // Validate input is a valid ID
+                if (!is_numeric($input) || !in_array((int) $input, $availableIds)) {
+                    $this->error("✗ Invalid checkpoint ID: {$input}");
                     return self::FAILURE;
                 }
+
+                $identifier = (int) $input;
             }
 
             // Find the checkpoint first to display info
@@ -129,12 +110,12 @@ class CheckpointRestoreCommand extends Command
 
             // Restore the checkpoint
             $this->info('Restoring checkpoint...');
-            $service->restore($identifier);
+            $service->restore((string) $identifier);
 
             // Success message
             $this->info("✓ Checkpoint '{$checkpoint->name}' restored successfully!");
             $this->line('');
-            $this->line("💡 Note: This checkpoint is still available and can be restored again.");
+            $this->line("Note: This checkpoint is still available and can be restored again.");
             $this->line('');
 
             return self::SUCCESS;
@@ -152,7 +133,7 @@ class CheckpointRestoreCommand extends Command
     /**
      * Truncate note for display purposes.
      */
-    private function truncateNote(string $note, int $maxLength = 30): string
+    private function truncateNote(string $note, int $maxLength = 20): string
     {
         if (strlen($note) <= $maxLength) {
             return $note;
@@ -168,13 +149,17 @@ class CheckpointRestoreCommand extends Command
     {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
+            $name = $checkpoint->name;
+            if ($checkpoint->locked) {
+                $name .= ' 🔒';
+            }
             $row = [
-                "#{$checkpoint->id}",
-                $checkpoint->name,
-                $checkpoint->note ? $this->truncateNote($checkpoint->note, 20) : '<comment>No note</comment>',
+                $checkpoint->id,
+                $name,
+                $checkpoint->note ? $this->truncateNote($checkpoint->note) : '-',
                 $service->formatFileSize($checkpoint->size),
                 $checkpoint->created_at->format('Y-m-d H:i:s'),
-                $checkpoint->encrypted ? '<comment>Yes</comment>' : 'No'
+                $checkpoint->encrypted ? 'Yes' : 'No',
             ];
 
             $rows[] = $row;
