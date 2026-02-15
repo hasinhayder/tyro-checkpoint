@@ -21,7 +21,7 @@ class VersionCommand extends Command
      */
     public function handle(): int
     {
-        $version = '1.1.0'; // Add encryption support
+        $version = '1.2.0'; // Security improvements and better delete UX
         
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
@@ -42,5 +42,6 @@ class VersionCommand extends Command
     }
 }
 
+//1.2.0 - Security improvements and better delete UX
 //1.1.0 - Add encryption support for checkpoints
 //1.0.0 - Initial release
