@@ -8,10 +8,11 @@ use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 
 /**
  * CheckpointDeleteCommand
- * 
+ *
  * Deletes a database checkpoint and its associated file.
- * 
+ *
  * Usage:
+ *   php artisan tyro-checkpoint:delete
  *   php artisan tyro-checkpoint:delete 1
  *   php artisan tyro-checkpoint:delete my_checkpoint
  */
@@ -20,7 +21,7 @@ class CheckpointDeleteCommand extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:delete {identifier : Checkpoint ID or name to delete}';
+    protected $signature = 'tyro-checkpoint:delete {identifier? : Checkpoint ID or name to delete}';
 
     /**
      * The console command description.
@@ -35,6 +36,44 @@ class CheckpointDeleteCommand extends Command
         try {
             // Get the identifier (ID or name)
             $identifier = $this->argument('identifier');
+
+            // If no identifier provided, ask the user to select one
+            if (!$identifier) {
+                $checkpoints = $service->list();
+
+                if ($checkpoints->isEmpty()) {
+                    $this->error('✗ No checkpoints found.');
+                    return self::FAILURE;
+                }
+
+                $this->info('Available checkpoints:');
+                $this->line('');
+
+                // Display table of checkpoints
+                $headers = ['ID', 'Name', 'Note', 'Size', 'Created'];
+                $rows = $this->formatTableRows($checkpoints, $service);
+                $this->table($headers, $rows);
+
+                // Get available IDs for validation
+                $availableIds = $checkpoints->pluck('id')->toArray();
+
+                $this->line('');
+                $input = $this->ask('Enter checkpoint ID to delete (0 to quit)');
+
+                // Handle quit
+                if ($input === '0' || $input === 0) {
+                    $this->info('Operation cancelled.');
+                    return self::SUCCESS;
+                }
+
+                // Validate input is a valid ID
+                if (!is_numeric($input) || !in_array((int) $input, $availableIds)) {
+                    $this->error("✗ Invalid checkpoint ID: {$input}");
+                    return self::FAILURE;
+                }
+
+                $identifier = (int) $input;
+            }
 
             // Find the checkpoint first to display info
             $checkpoint = $service->find($identifier);
@@ -53,6 +92,12 @@ class CheckpointDeleteCommand extends Command
             $this->line("  Name:    {$checkpoint->name}");
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
+            if ($checkpoint->locked) {
+                $this->line("  Status:  <comment>Locked</comment>");
+            }
+            if ($checkpoint->note) {
+                $this->line("  Note:    {$checkpoint->note}");
+            }
             $this->line('');
 
             // Ask for confirmation
@@ -62,7 +107,7 @@ class CheckpointDeleteCommand extends Command
             }
 
             // Delete the checkpoint
-            $service->delete($identifier);
+            $service->delete((string) $identifier);
 
             // Success message
             $this->info("✓ Checkpoint '{$checkpoint->name}' deleted successfully!");
@@ -78,5 +123,42 @@ class CheckpointDeleteCommand extends Command
             $this->error("✗ An unexpected error occurred: {$e->getMessage()}");
             return self::FAILURE;
         }
+    }
+
+    /**
+     * Truncate note for display purposes.
+     */
+    private function truncateNote(string $note, int $maxLength = 30): string
+    {
+        if (strlen($note) <= $maxLength) {
+            return $note;
+        }
+
+        return substr($note, 0, $maxLength) . '...';
+    }
+
+    /**
+     * Format checkpoints data for table display.
+     */
+    private function formatTableRows($checkpoints, $service): array
+    {
+        $rows = [];
+        foreach ($checkpoints as $checkpoint) {
+            $name = $checkpoint->name;
+            if ($checkpoint->locked) {
+                $name .= ' 🔒';
+            }
+            $row = [
+                $checkpoint->id,
+                $name,
+                $checkpoint->note ? $this->truncateNote($checkpoint->note, 20) : '-',
+                $service->formatFileSize($checkpoint->size),
+                $checkpoint->created_at->format('Y-m-d H:i:s'),
+            ];
+
+            $rows[] = $row;
+        }
+
+        return $rows;
     }
 }
