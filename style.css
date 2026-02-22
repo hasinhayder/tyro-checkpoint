@@ -558,13 +558,13 @@ body {
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.15em;
-    color: #f97316;
-    border: 1px solid rgba(249, 115, 22, 0.3);
+    color: var(--hero-18-cyan);
+    border: 1px solid rgba(0, 210, 255, 0.3);
     padding: 6px 12px;
     border-radius: 4px;
     margin-bottom: 24px;
     text-transform: uppercase;
-    background: rgba(249, 115, 22, 0.05);
+    background: rgba(0, 210, 255, 0.05);
 }
 
 .problem-heading {
@@ -603,7 +603,7 @@ body {
 }
 
 .problem-list .arrow {
-    color: #f97316;
+    color: var(--hero-18-cyan);
     font-weight: bold;
 }
 
@@ -658,8 +658,8 @@ body {
     background: #475569;
 }
 
-.orange-bullets li::before {
-    background: #f97316;
+.cyan-bullets li::before {
+    background: var(--hero-18-cyan);
 }
 
 .state-footer {
@@ -672,7 +672,7 @@ body {
 }
 
 .state-footer.highlight-text {
-    color: #f97316;
+    color: var(--hero-18-cyan);
 }
 
 .section-block {
@@ -1226,78 +1226,112 @@ body {
 .cta-block {
     padding: 120px 20px;
     border-top: 1px solid var(--color-border);
-    text-align: center;
+    display: flex;
+    justify-content: center;
 }
 
 .cta-block-inner {
-    max-width: 640px;
+    width: 100%;
+    max-width: 1100px;
     margin: 0 auto;
+    background: #0b1020;
+    border: 1px solid #1f2937;
+    border-radius: 24px;
+    padding: 80px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.3);
+}
+
+.cta-block-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hero-18-cyan), transparent);
+    opacity: 0.5;
 }
 
 .cta-block h2 {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 900;
     letter-spacing: -0.04em;
-    color: var(--color-text);
-    margin: 0 0 1rem;
+    color: #ffffff;
+    margin: 0 0 24px;
     line-height: 1;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 2;
+}
+
+.cta-block h2 .accent {
+    color: var(--hero-18-cyan);
 }
 
 .cta-block p {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    margin: 0 0 2.5rem;
+    font-size: 1.25rem;
+    color: #94a3b8;
+    margin: 0 auto 48px;
+    max-width: 640px;
     line-height: 1.6;
+    position: relative;
+    z-index: 2;
 }
 
 .cta-btns {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     justify-content: center;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
 }
 
 .cta-btn-a {
-    background: #111;
-    color: white;
-    padding: 16px 36px;
-    border-radius: 12px;
-    font-size: 1rem;
+    background: var(--hero-18-cyan);
+    color: #0b1020;
+    padding: 18px 40px;
+    border-radius: 14px;
+    font-size: 1.1rem;
     font-weight: 800;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    transition: opacity 0.2s;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 20px -5px rgba(0, 210, 255, 0.3);
 }
 
 .cta-btn-a:hover {
-    opacity: 0.85;
-}
-
-[data-theme="dark"] .cta-btn-a {
-    background: #f8fafc;
-    color: #0f172a;
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(0, 210, 255, 0.4);
+    background: #00bfff;
 }
 
 .cta-btn-b {
-    background: transparent;
-    color: var(--color-text);
-    padding: 16px 36px;
-    border-radius: 12px;
-    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+    padding: 18px 40px;
+    border-radius: 14px;
+    font-size: 1.1rem;
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    border: 1px solid var(--color-border);
-    transition: border-color 0.2s, color 0.2s;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
 }
 
 .cta-btn-b:hover {
     border-color: var(--hero-18-cyan);
+    background: rgba(0, 210, 255, 0.1);
+}
     color: var(--hero-18-cyan);
 }
 
