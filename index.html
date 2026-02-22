@@ -146,88 +146,102 @@
 				</p>
 			</div>
 
-			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+			<div class="use-cases-bento">
 
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-large">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+						</div>
 					</div>
-					<h3>Feature Development</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Build complex features without fear. Take a snapshot before implementing risky logic, migrations, or seeders, and instantly restore if something breaks.
-					</p>
+					<div class="bento-content" style="justify-content: flex-end;">
+						<h3>Feature<br>Development</h3>
+						<p>Build complex features without fear. Take a snapshot before implementing risky logic, migrations, or seeders, and instantly restore if something breaks.</p>
+					</div>
 				</div>
 
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-wide">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+						</div>
 					</div>
-					<h3>Migration Testing</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Test schema changes safely. Run destructive migrations, verify results, and instantly revert to the previous state if anything behaves unexpectedly.
-					</p>
+					<div class="bento-content">
+						<h3>Migration Testing</h3>
+						<p>Test schema changes safely. Run destructive migrations, verify results, and instantly revert to the previous state if anything behaves unexpectedly.</p>
+					</div>
 				</div>
 
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-standard">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+						</div>
 					</div>
-					<h3>Team Development</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Create and share standard database states across your team. Ensure every developer starts from the same reliable, production-like dataset.
-					</p>
+					<div class="bento-content">
+						<h3>Team Dev</h3>
+						<p>Share standard database states across your team.</p>
+					</div>
 				</div>
 
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-standard">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+						</div>
 					</div>
-					<h3>Educators & Live Demos</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Freely modify data during live coding sessions, workshops, or recordings. Restore instantly and repeat demonstrations without rebuilding your database.
-					</p>
+					<div class="bento-content">
+						<h3>Live Demos</h3>
+						<p>Safely modify data during live sessions.</p>
+					</div>
 				</div>
 
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-tall">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+						</div>
 					</div>
-					<h3>Safe Experimentation</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Explore new ideas, refactor aggressively, and experiment with confidence knowing you can always return to a stable checkpoint.
-					</p>
+					<div class="bento-content" style="justify-content: flex-end;">
+						<h3>Sandbox Envs</h3>
+						<p>Maintain clean demo environments by restoring a golden baseline automatically. Perfect for SaaS demos and test sandboxes.</p>
+					</div>
 				</div>
 
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-wide">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+						</div>
 					</div>
-					<h3>Demo & Sandbox Environments</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Maintain clean demo environments by restoring a golden baseline automatically. Perfect for SaaS demos, staging environments, and test sandboxes.
-					</p>
+					<div class="bento-content">
+						<h3>Safe Experimentation</h3>
+						<p>Explore new ideas, refactor aggressively, and experiment with confidence knowing you can always return to a stable checkpoint.</p>
+					</div>
 				</div>
 
-				<!-- NEW — extremely strong use case -->
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-standard">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+						</div>
 					</div>
-					<h3>Seeder & Test Data Reset</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Reset your database instantly between tests or development sessions without rerunning slow seeders or rebuilding everything from scratch.
-					</p>
+					<div class="bento-content">
+						<h3>Data Reset</h3>
+						<p>Reset DB instantly between tests without slow seeders.</p>
+					</div>
 				</div>
 
-				<!-- NEW — extremely strong for indie hackers -->
-				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
-					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
-						<!-- icon -->
+				<div class="bento-card bento-xwide">
+					<div class="bento-top-row">
+						<div class="bento-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+						</div>
 					</div>
-					<h3>Before Running Risky Commands</h3>
-					<p style="opacity: 0.8; font-size: 0.95rem;">
-						Take a checkpoint before running unfamiliar migrations, scripts, or imports. If anything goes wrong, recover instantly without data loss.
-					</p>
+					<div class="bento-content">
+						<h3>Risky Commands</h3>
+						<p>Take a checkpoint before running unfamiliar migrations, scripts, or imports. If anything goes wrong, recover instantly without data loss.</p>
+					</div>
 				</div>
 
 			</div>
