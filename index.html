@@ -395,6 +395,48 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 		</div>
 	</section>
 
+	<section id="encryption-problem" class="problem-section" style="background: #0b1020;">
+		<div class="problem-container">
+			<div class="problem-content">
+				<div class="problem-eyebrow">WHY ENCRYPTION MATTERS</div>
+				<h2 class="problem-heading">Better Security</h2>
+				<p class="problem-text">
+					When working with local development databases, developers often use production-like data or sensitive PII (Personally Identifiable Information). Without encryption, every snapshot is a potential security risk if shared or stored insecurely.
+				</p>
+				<ul class="problem-list">
+					<li><span class="arrow">→</span> Exposed user data</li>
+					<li><span class="arrow">→</span> Compliance violations</li>
+					<li><span class="arrow">→</span> Unsafe sharing across teams</li>
+				</ul>
+				<p class="problem-text">
+					Tyro Checkpoint's AES-256 encryption ensures your data remains safe, even if snapshots are shared.
+				</p>
+			</div>
+
+			<div class="problem-visuals">
+				<div class="state-card before-card">
+					<div class="state-header">BEFORE (UNENCRYPTED)</div>
+					<ul class="state-list gray-bullets">
+						<li>Plain SQLite files</li>
+						<li>Readable by anyone</li>
+						<li>High risk of data leaks</li>
+					</ul>
+					<div class="state-footer">Vulnerable</div>
+				</div>
+
+				<div class="state-card after-card">
+					<div class="state-header">AFTER (ENCRYPTED)</div>
+					<ul class="state-list orange-bullets">
+						<li>AES-256-CBC Encryption</li>
+						<li>Requires decryption key</li>
+						<li>Safe to store and share</li>
+					</ul>
+					<div class="state-footer highlight-text">Protected</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<section id="installation" class="section-block" style="background: var(--color-bg-secondary);">
 		<div class="section-block-inner">
 			<div style="text-align: center; margin-bottom: 4rem;">
