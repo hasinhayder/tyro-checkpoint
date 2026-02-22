@@ -136,114 +136,147 @@
 		</div>
 	</header>
 
-	<section id="use-cases" class="section-block" style="background: var(--color-bg-secondary);">
-		<div class="section-block-inner">
-			<div style="text-align: center; margin-bottom: 4rem;">
-				<span class="section-eyebrow">Use Cases</span>
-				<h2 class="section-heading">Built for <span class="accent">Real Workflows.</span></h2>
-				<p class="section-lead" style="margin: 0 auto;">
-					Tyro Checkpoint eliminates everyday database anxiety by giving you instant recovery, repeatable states, and complete control over your data.
+	<section id="the-problem" class="problem-section" style="background: #0b1020;">
+		<div class="problem-container">
+			<div class="problem-content">
+				<div class="problem-eyebrow">WHY TYRO CHECKPOINT</div>
+				<h2 class="problem-heading">THE PROBLEM</h2>
+				<p class="problem-text">
+					During Laravel development, you constantly test features, experiment with data changes, and debug database-related issues. Every time something breaks or you need to switch contexts, you're faced with the same tedious cycle:
+				</p>
+				<ul class="problem-list">
+					<li><span class="arrow">→</span> Dropping and recreating the database</li>
+					<li><span class="arrow">→</span> Re-running migrations</li>
+					<li><span class="arrow">→</span> Re-seeding data — often the most time-consuming part</li>
+				</ul>
+				<p class="problem-text">
+					This repetitive workflow kills productivity and interrupts your development flow. What you need is a way to save clean database states and restore them instantly — without the overhead.
 				</p>
 			</div>
 
-			<div class="use-cases-bento">
-
-				<div class="bento-card bento-large">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-						</div>
-					</div>
-					<div class="bento-content" style="justify-content: flex-end;">
-						<h3>Feature<br>Development</h3>
-						<p>Build complex features without fear. Take a snapshot before implementing risky logic, migrations, or seeders, and instantly restore if something breaks.</p>
-					</div>
+			<div class="problem-visuals">
+				<div class="state-card before-card">
+					<div class="state-header">BEFORE</div>
+					<ul class="state-list gray-bullets">
+						<li>Drop database</li>
+						<li>Run migrations</li>
+						<li>Seed data (slow)</li>
+						<li>Repeat every time</li>
+					</ul>
+					<div class="state-footer">~2-5 minutes per reset</div>
 				</div>
 
-				<div class="bento-card bento-wide">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-						</div>
-					</div>
-					<div class="bento-content">
-						<h3>Migration Testing</h3>
-						<p>Test schema changes safely. Run destructive migrations, verify results, and instantly revert to the previous state if anything behaves unexpectedly.</p>
-					</div>
+				<div class="state-card after-card">
+					<div class="state-header">AFTER</div>
+					<ul class="state-list orange-bullets">
+						<li>Create checkpoint once</li>
+						<li>Restore instantly</li>
+						<li>Keep coding</li>
+					</ul>
+					<div class="state-footer highlight-text">~2 seconds per reset</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="use-cases" class="feature-matrix" style="background: var(--color-bg-secondary);">
+		<div class="matrix-container">
+			<div class="manifest-header">
+				<span class="section-eyebrow">Use Cases</span>
+				<h2 class="manifest-title">Built for <span class="accent">Real Life Scenarios</span></h2>
+				<p class="manifest-subtitle">
+					Eliminate database anxiety. Tyro Checkpoint grants you instant recovery,<br>repeatable environments, and absolute command over your data.
+				</p>
+			</div>
+
+			<div class="matrix-grid">
+				<div class="matrix-item">
+					<div class="matrix-index">01</div>
+					<h3>Feature Development</h3>
+					<p>
+						Build complex features without fear. Take a snapshot before implementing risky logic, migrations, or seeders, and instantly restore if something breaks.
+					</p>
 				</div>
 
-				<div class="bento-card bento-standard">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-						</div>
-					</div>
-					<div class="bento-content">
-						<h3>Team Dev</h3>
-						<p>Share standard database states across your team.</p>
-					</div>
+				<div class="matrix-item">
+					<div class="matrix-index">02</div>
+					<h3>Tinker & Repeat</h3>
+					<p>
+						Testing complex data mutations or API integrations? Perform your tests, observe the side effects, then restore to a fresh state and repeat the process in seconds.
+					</p>
 				</div>
 
-				<div class="bento-card bento-standard">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-						</div>
-					</div>
-					<div class="bento-content">
-						<h3>Live Demos</h3>
-						<p>Safely modify data during live sessions.</p>
-					</div>
+				<div class="matrix-item">
+					<div class="matrix-index">03</div>
+					<h3>Migration Testing</h3>
+					<p>
+						Test schema changes safely. Run destructive migrations, verify results, and instantly revert to the previous state if anything behaves unexpectedly.
+					</p>
 				</div>
 
-				<div class="bento-card bento-tall">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-						</div>
-					</div>
-					<div class="bento-content" style="justify-content: flex-end;">
-						<h3>Sandbox Envs</h3>
-						<p>Maintain clean demo environments by restoring a golden baseline automatically. Perfect for SaaS demos and test sandboxes.</p>
-					</div>
+				<div class="matrix-item">
+					<div class="matrix-index">04</div>
+					<h3>Safe Experimentation</h3>
+					<p>
+						Explore new ideas, refactor aggressively, and experiment with confidence knowing you can always return to a stable checkpoint.
+					</p>
 				</div>
 
-				<div class="bento-card bento-wide">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-						</div>
-					</div>
-					<div class="bento-content">
-						<h3>Safe Experimentation</h3>
-						<p>Explore new ideas, refactor aggressively, and experiment with confidence knowing you can always return to a stable checkpoint.</p>
-					</div>
+				<div class="matrix-item">
+					<div class="matrix-index">05</div>
+					<h3>Data Reset</h3>
+					<p>
+						Reset DB instantly between tests without slow seeders. Ensure a clean slate for automated testing and CI/CD pipelines effortlessly.
+					</p>
 				</div>
 
-				<div class="bento-card bento-standard">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-						</div>
-					</div>
-					<div class="bento-content">
-						<h3>Data Reset</h3>
-						<p>Reset DB instantly between tests without slow seeders.</p>
-					</div>
+				<div class="matrix-item">
+					<div class="matrix-index">06</div>
+					<h3>Risky Commands</h3>
+					<p>
+						Take a checkpoint before running unfamiliar migrations, scripts, or imports. If anything goes wrong, recover instantly without data loss.
+					</p>
 				</div>
 
-				<div class="bento-card bento-xwide">
-					<div class="bento-top-row">
-						<div class="bento-icon">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-						</div>
-					</div>
-					<div class="bento-content">
-						<h3>Risky Commands</h3>
-						<p>Take a checkpoint before running unfamiliar migrations, scripts, or imports. If anything goes wrong, recover instantly without data loss.</p>
-					</div>
+				<div class="matrix-item">
+					<div class="matrix-index">07</div>
+					<h3>Team Development</h3>
+					<p>
+						Share standard database states across your team. Ensure everyone develops against consistent, known-good data to avoid local discrepancies.
+					</p>
 				</div>
 
+				<div class="matrix-item">
+					<div class="matrix-index">08</div>
+					<h3>Performance Benchmarking</h3>
+					<p>
+						Switch between small, medium, and massive datasets to test how your application behaves. Keep multiple versions of your data ready for instant swapping.
+					</p>
+				</div>
+
+				<div class="matrix-item">
+					<div class="matrix-index">09</div>
+					<h3>Quick Sandbox</h3>
+					<p>
+						Maintain clean demo environments by restoring a golden baseline automatically. Perfect for SaaS demos and test sandboxes.
+					</p>
+				</div>
+
+				<div class="matrix-item">
+					<div class="matrix-index">10</div>
+					<h3>Live Demos</h3>
+					<p>
+						Safely modify data during live sessions. Confidently showcase features without worrying about ruining your pristine presentation dataset.
+					</p>
+				</div>
+
+				<div class="matrix-item">
+					<div class="matrix-index">11</div>
+					<h3>Education & Workshops</h3>
+					<p>
+						Perfect for classroom presentations. Modify data live to demonstrate features, then reset to a clean state instantly for the next take or group.
+					</p>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -252,7 +285,7 @@
 		<div class="matrix-container">
 			<div class="manifest-header">
 				<span class="section-eyebrow">The Manifest</span>
-				<h2 class="manifest-title">Granular Data <span class="accent">Control.</span></h2>
+				<h2 class="manifest-title">Powerful <span class="accent">Features.</span></h2>
 				<p class="manifest-subtitle">
 					Checkpoint eliminates the fear of data modification<br>
 					by giving you a reliable safety net for your development database.
@@ -271,15 +304,6 @@
 
 				<div class="matrix-item">
 					<div class="matrix-index">02</div>
-					<h3>Golden Baselines</h3>
-					<p>
-						Establish trusted, known-good states for your application. Share baselines with your team so everyone
-						starts from the same production-like dataset.
-					</p>
-				</div>
-
-				<div class="matrix-item">
-					<div class="matrix-index">03</div>
 					<h3>Migration Safety</h3>
 					<p>
 						Run migrations with complete confidence. If anything breaks, simply <code>restore</code> to instantly
@@ -288,16 +312,16 @@
 				</div>
 
 				<div class="matrix-item">
-					<div class="matrix-index">04</div>
-					<h3>Zero Configuration</h3>
+					<div class="matrix-index">03</div>
+					<h3>Golden Baselines</h3>
 					<p>
-						Built specifically for SQLite workflows. Checkpoint automatically detects your database paths and
-						starts protecting your data without any configuration or boilerplate.
+						Establish trusted, known-good states for your application. Share baselines with your team so everyone
+						starts from the same production-like dataset.
 					</p>
 				</div>
 
 				<div class="matrix-item">
-					<div class="matrix-index">05</div>
+					<div class="matrix-index">04</div>
 					<h3>Git-Like Workflow</h3>
 					<p>
 						Use <code>create</code> to snapshot and <code>restore</code> to revert. The <code>list</code> command
@@ -306,11 +330,44 @@
 				</div>
 
 				<div class="matrix-item">
+					<div class="matrix-index">05</div>
+					<h3>Lock Protection</h3>
+					<p>
+						Protect important checkpoints from accidental deletion with the lock feature. Your critical states stay safe.
+					</p>
+				</div>
+
+				<div class="matrix-item">
 					<div class="matrix-index">06</div>
+					<h3>Descriptive Notes</h3>
+					<p>
+						Attach meaningful notes to checkpoints so you always remember what each state represents.
+					</p>
+				</div>
+
+				<div class="matrix-item">
+					<div class="matrix-index">07</div>
 					<h3>AES-256 Encryption</h3>
 					<p>
 						Secure your snapshots with industry-grade encryption. Protect sensitive data and safely share
 						baselines without compromising privacy.
+					</p>
+				</div>
+
+				<div class="matrix-item">
+					<div class="matrix-index">08</div>
+					<h3>Zero Configuration</h3>
+					<p>
+						Built specifically for SQLite workflows. Checkpoint automatically detects your database paths and
+						starts protecting your data without any configuration or boilerplate.
+					</p>
+				</div>
+
+				<div class="matrix-item">
+					<div class="matrix-index">09</div>
+					<h3>Flexible Config</h3>
+					<p>
+						Configure custom storage paths and behavior through environment variables or published config files.
 					</p>
 				</div>
 			</div>
