@@ -1346,4 +1346,13 @@ body {
     .responsive-list-grid {
         grid-template-columns: 1fr;
     }
+
+    .powering-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .matrix-grid {
+        grid-template-columns: 1fr;
+    }
 }

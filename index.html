@@ -6,12 +6,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Tyro Checkpoint - Database Snapshot & State Management for Laravel</title>
 	<meta name="description" content="Snapshot your SQLite database state, establish golden baselines, and ensure migration safety with Tyro Checkpoint.">
-	
+
 	<!-- Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
-	
+
 	<!-- Styles -->
 	<link rel="stylesheet" href="style.css">
 </head>
@@ -24,9 +24,11 @@
 				<span class="navbar-badge">v1.2</span>
 			</a>
 			<div class="navbar-links" id="navbarLinks">
+				<a href="#use-cases" class="navbar-link">Use Cases</a>
 				<a href="#features" class="navbar-link">Features</a>
 				<a href="#snapshots" class="navbar-link">Snapshots</a>
 				<a href="#installation" class="navbar-link">Installation</a>
+				<a href="doc.html" class="navbar-link">Documentation</a>
 				<a href="https://github.com/hasinhayder/tyro-checkpoint" class="navbar-cta" target="_blank">View on GitHub</a>
 			</div>
 			<button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">
@@ -55,11 +57,11 @@
 
 	<header class="hero-18">
 		<div class="hero-18-pattern"></div>
-		
+
 		<!-- Floating UI elements for Checkpoint -->
 		<div class="floating-card" style="top: 25%; left: 8%;">
 			<div class="floating-card-icon">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+				<!-- icon -->
 			</div>
 			<div class="floating-card-info">
 				<h5>Snapshot Created</h5>
@@ -69,7 +71,7 @@
 
 		<div class="floating-card" style="bottom: 30%; right: 10%;">
 			<div class="floating-card-icon">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>
+				<!-- icon -->
 			</div>
 			<div class="floating-card-info">
 				<h5>State Restored</h5>
@@ -78,84 +80,224 @@
 		</div>
 
 		<div class="hero-18-container">
+
+			<!-- HEADLINE -->
 			<h1 class="hero-18-title">
-				Snapshot Your <br><span class="accent">Database State.</span>
+				Version Control for <br>
+				<span class="accent">SQLite Database</span>
 			</h1>
+
+			<!-- SUBHEADLINE -->
 			<p class="hero-18-description">
-				Stop losing your local data state. Tyro Checkpoint provides git-like versioning for your SQLite databases, allowing you to snapshot, restore, and establish golden baselines in seconds.
+				Tyro Checkpoint lets you snapshot, restore, and manage your database state instantly.
+				Run migrations, experiment freely, and recover from mistakes instantly.
 			</p>
 
+			<!-- CTA -->
 			<div class="hero-actions">
 				<a href="#installation" class="hero-18-btn">
-					Start Snapshotting
+					Install Checkpoint
 					<span class="cta-arrow">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-							<line x1="5" y1="12" x2="19" y2="12"></line>
-							<polyline points="12 5 19 12 12 19"></polyline>
-						</svg>
+						<!-- arrow icon -->
 					</span>
 				</a>
-				<div class="install-chip">composer require hasinhayder/tyro-checkpoint --dev</div>
-			</div>
 
-			<div class="hero-18-powering">
-				<p class="powering-title">Version Control for your development data</p>
-				<div class="powering-grid">
-					<div class="powering-item">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-						Golden Baselines
-					</div>
-					<div class="powering-item">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-						Rapid Restoration
-					</div>
-					<div class="powering-item">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-						Timeline History
-					</div>
+				<div class="install-chip">
+					composer require hasinhayder/tyro-checkpoint --dev
 				</div>
 			</div>
+
+			<!-- TRUST / FEATURE SUMMARY -->
+			<div class="hero-18-powering">
+				<p class="powering-title">
+					Built for Laravel
+				</p>
+
+				<div class="powering-grid">
+
+					<div class="powering-item">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path> </svg>
+						Golden Baselines
+					</div>
+
+					<div class="powering-item">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path> <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline> <line x1="12" y1="22.08" x2="12" y2="12"></line> </svg>
+						Instant Recovery
+					</div>
+
+					<div class="powering-item">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle> <polyline points="12 6 12 12 16 14"></polyline> </svg>
+						Full History
+					</div>
+
+				</div>
+			</div>
+
 		</div>
 	</header>
+
+	<section id="use-cases" class="section-block" style="background: var(--color-bg-secondary);">
+		<div class="section-block-inner">
+			<div style="text-align: center; margin-bottom: 4rem;">
+				<span class="section-eyebrow">Use Cases</span>
+				<h2 class="section-heading">Built for <span class="accent">Real Workflows.</span></h2>
+				<p class="section-lead" style="margin: 0 auto;">
+					Tyro Checkpoint eliminates everyday database anxiety by giving you instant recovery, repeatable states, and complete control over your data.
+				</p>
+			</div>
+
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Feature Development</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Build complex features without fear. Take a snapshot before implementing risky logic, migrations, or seeders, and instantly restore if something breaks.
+					</p>
+				</div>
+
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Migration Testing</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Test schema changes safely. Run destructive migrations, verify results, and instantly revert to the previous state if anything behaves unexpectedly.
+					</p>
+				</div>
+
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Team Development</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Create and share standard database states across your team. Ensure every developer starts from the same reliable, production-like dataset.
+					</p>
+				</div>
+
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Educators & Live Demos</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Freely modify data during live coding sessions, workshops, or recordings. Restore instantly and repeat demonstrations without rebuilding your database.
+					</p>
+				</div>
+
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Safe Experimentation</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Explore new ideas, refactor aggressively, and experiment with confidence knowing you can always return to a stable checkpoint.
+					</p>
+				</div>
+
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Demo & Sandbox Environments</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Maintain clean demo environments by restoring a golden baseline automatically. Perfect for SaaS demos, staging environments, and test sandboxes.
+					</p>
+				</div>
+
+				<!-- NEW — extremely strong use case -->
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Seeder & Test Data Reset</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Reset your database instantly between tests or development sessions without rerunning slow seeders or rebuilding everything from scratch.
+					</p>
+				</div>
+
+				<!-- NEW — extremely strong for indie hackers -->
+				<div class="matrix-item" style="border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg);">
+					<div class="benefit-icon" style="margin-bottom: 1.5rem; color: var(--hero-18-cyan);">
+						<!-- icon -->
+					</div>
+					<h3>Before Running Risky Commands</h3>
+					<p style="opacity: 0.8; font-size: 0.95rem;">
+						Take a checkpoint before running unfamiliar migrations, scripts, or imports. If anything goes wrong, recover instantly without data loss.
+					</p>
+				</div>
+
+			</div>
+		</div>
+	</section>
 
 	<section id="features" class="feature-matrix">
 		<div class="matrix-container">
 			<div class="manifest-header">
 				<span class="section-eyebrow">The Manifest</span>
 				<h2 class="manifest-title">Granular Data <span class="accent">Control.</span></h2>
-				<p class="manifest-subtitle">Checkpoint eliminates the "fear of migration" by giving you a safety net for your development database.</p>
+				<p class="manifest-subtitle">
+					Checkpoint eliminates the fear of data modification<br>
+					by giving you a reliable safety net for your development database.
+				</p>
 			</div>
 
 			<div class="matrix-grid">
 				<div class="matrix-item">
 					<div class="matrix-index">01</div>
 					<h3>Lightning Snapshots</h3>
-					<p>Capture the exact state of your database before running risky migrations or destructive seeders. Instant and lightweight.</p>
+					<p>
+						Capture the exact state of your database before running risky migrations or destructive seeders.
+						Fast, lightweight, and instantly restorable.
+					</p>
 				</div>
+
 				<div class="matrix-item">
 					<div class="matrix-index">02</div>
 					<h3>Golden Baselines</h3>
-					<p>Establish "known good" states for your app. Share baselines with your team so everyone starts from the same production-like dataset.</p>
+					<p>
+						Establish trusted, known-good states for your application. Share baselines with your team so everyone
+						starts from the same production-like dataset.
+					</p>
 				</div>
+
 				<div class="matrix-item">
 					<div class="matrix-index">03</div>
 					<h3>Migration Safety</h3>
-					<p>Run migrations with confidence. If something breaks, simply `restore` to jump back to the exact second before the migration began.</p>
+					<p>
+						Run migrations with complete confidence. If anything breaks, simply <code>restore</code> to instantly
+						return to the exact state before the migration began.
+					</p>
 				</div>
+
 				<div class="matrix-item">
 					<div class="matrix-index">04</div>
 					<h3>Zero Configuration</h3>
-					<p>Designed specifically for SQLite workflows. It detects your database paths automatically and starts working without any boilerplate.</p>
+					<p>
+						Built specifically for SQLite workflows. Checkpoint automatically detects your database paths and
+						starts protecting your data without any configuration or boilerplate.
+					</p>
 				</div>
+
 				<div class="matrix-item">
 					<div class="matrix-index">05</div>
-					<h3>Git-Like Flow</h3>
-					<p>Use `create` to save and `restore` to revert. Use the `list` command to view your database timeline and historical states.</p>
+					<h3>Git-Like Workflow</h3>
+					<p>
+						Use <code>create</code> to snapshot and <code>restore</code> to revert. The <code>list</code> command
+						gives you a complete timeline of your database history.
+					</p>
 				</div>
+
 				<div class="matrix-item">
 					<div class="matrix-index">06</div>
 					<h3>AES-256 Encryption</h3>
-					<p>Secure your snapshots with forensic-grade encryption. Protect sensitive PII and production-like data even when sharing baselines.</p>
+					<p>
+						Secure your snapshots with industry-grade encryption. Protect sensitive data and safely share
+						baselines without compromising privacy.
+					</p>
 				</div>
 			</div>
 		</div>
@@ -228,20 +370,23 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 						<div class="ide-header">
 							<div class="ide-dots"><span></span><span></span><span></span></div>
 							<div class="ide-tab">
-								<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+								<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<polyline points="4 17 10 11 4 5"></polyline>
+									<line x1="12" y1="19" x2="20" y2="19"></line>
+								</svg>
 								bash
 							</div>
 						</div>
 						<div class="ide-content">
 							<div style="color: var(--hero-18-cyan); margin-bottom: 8px;"># Step 1: Install via Composer</div>
 							<div style="margin-bottom: 16px;">composer require hasinhayder/tyro-checkpoint --dev</div>
-							
+
 							<div style="color: var(--hero-18-cyan); margin-bottom: 8px;"># Step 2: Initialize Checkpoint</div>
 							<div style="margin-bottom: 16px;">php artisan tyro-checkpoint:install</div>
-							
+
 							<div style="color: var(--hero-18-cyan); margin-bottom: 8px;"># Step 3: Create your first snapshot</div>
 							<div style="margin-bottom: 16px;">php artisan tyro-checkpoint:create "Initial"</div>
-							
+
 							<div style="color: #22c55e;">✓ Success: Snapshot 'initial' created!</div>
 						</div>
 					</div>
@@ -272,21 +417,30 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 			<div class="scaffold-benefits">
 				<div class="scaffold-benefit">
 					<div class="benefit-icon">
-						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+						</svg>
 					</div>
 					<h4>Zero Friction</h4>
 					<p>Works immediately after installation with your existing Laravel SQLite configuration.</p>
 				</div>
 				<div class="scaffold-benefit">
 					<div class="benefit-icon">
-						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+							<circle cx="9" cy="7" r="4"></circle>
+							<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+							<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+						</svg>
 					</div>
 					<h4>Developer Experience</h4>
 					<p>Built for the command line. Intuitive arg and option names that match your workflow.</p>
 				</div>
 				<div class="scaffold-benefit">
 					<div class="benefit-icon">
-						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+						</svg>
 					</div>
 					<h4>Rock Solid</h4>
 					<p>Uses atomic file copy operations to ensure snapshots are perfectly captured without data loss.</p>
@@ -300,6 +454,12 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 			<h2>Ready for a <br><span class="accent">database safety net?</span></h2>
 			<p>Join the Laravel teams managing their development data with confidence using Tyro Checkpoint.</p>
 			<div class="cta-btns">
+				<a href="doc.html" class="cta-btn-a">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+					</svg>
+					Documentation
+				</a>
 				<a href="https://github.com/hasinhayder/tyro-checkpoint" class="cta-btn-a" target="_blank">
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
@@ -320,6 +480,7 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 				<h4>Product</h4>
 				<ul>
 					<li><a href="#features">Features</a></li>
+					<li><a href="#use-cases">Use Cases</a></li>
 					<li><a href="#snapshots">Snapshots</a></li>
 					<li><a href="#installation">Installation</a></li>
 				</ul>
@@ -362,7 +523,7 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 		themeToggle.addEventListener('click', () => {
 			const currentTheme = htmlElement.getAttribute('data-theme');
 			const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-			
+
 			htmlElement.setAttribute('data-theme', newTheme);
 			localStorage.setItem('theme', newTheme);
 		});
