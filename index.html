@@ -445,9 +445,9 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 				<p class="section-lead" style="margin: 0 auto;">Tyro Checkpoint is highly focused and performs one job perfectly. Install it as a dev dependency and start snapshotting.</p>
 			</div>
 
-			<div class="scaffold-interactive-showcase">
-				<div class="scaffold-display-grid">
-					<div class="terminal-scaffold">
+			<div class="installation-showcase">
+				<div class="installation-terminal-wrapper">
+					<div class="terminal-scaffold terminal-large">
 						<div class="ide-header">
 							<div class="ide-dots"><span></span><span></span><span></span></div>
 							<div class="ide-tab">
@@ -458,52 +458,31 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 								bash
 							</div>
 						</div>
-						<div class="ide-content">
-							<div style="color: var(--hero-18-cyan); margin-bottom: 8px;"># Step 1: Install via Composer</div>
-							<div style="margin-bottom: 16px;">composer require hasinhayder/tyro-checkpoint --dev</div>
-
-							<div style="color: var(--hero-18-cyan); margin-bottom: 8px;"># Step 2: Initialize Checkpoint</div>
-							<div style="margin-bottom: 16px;">php artisan tyro-checkpoint:install</div>
-
-							<div style="color: var(--hero-18-cyan); margin-bottom: 8px;"># Step 3: Create your first snapshot</div>
-							<div style="margin-bottom: 16px;">php artisan tyro-checkpoint:create "Initial"</div>
-
-							<div style="color: #22c55e;">✓ Success: Snapshot 'initial' created!</div>
-						</div>
-					</div>
-
-					<div class="scaffold-preview-mock">
-						<div class="mock-sidebar">
-							<div class="sidebar-top"></div>
-							<div class="sidebar-header">CHECKPOINT</div>
-							<div class="sidebar-item highlight">Snapshots</div>
-							<div class="sidebar-item">Timeline</div>
-							<div class="sidebar-item">Settings</div>
-						</div>
-						<div class="mock-content-area">
-							<div class="mock-title-bar">
-								<div class="mock-title">Active Snapshots</div>
-								<div class="mock-badge" style="background: var(--hero-18-cyan); color: #0b1020;">3 States</div>
-							</div>
-							<div class="mock-canvas">
-								<div class="mock-skeleton" style="height: 48px; width: 100%; border-left: 4px solid var(--hero-18-cyan);"></div>
-								<div class="mock-skeleton" style="height: 48px; width: 100%;"></div>
-								<div class="mock-skeleton" style="height: 48px; width: 100%;"></div>
-							</div>
+						<div class="ide-content ide-content-large">
+							<div class="cmd-line"><span class="cmd-comment"># Step 1: Install via Composer</span></div>
+							<div class="cmd-line"><span class="cmd-prompt">$</span> <span class="cmd-text">composer require hasinhayder/tyro-checkpoint --dev</span></div>
+							<br>
+							<div class="cmd-line"><span class="cmd-comment"># Step 2: Initialize Checkpoint</span></div>
+							<div class="cmd-line"><span class="cmd-prompt">$</span> <span class="cmd-text">php artisan tyro-checkpoint:install</span></div>
+							<br>
+							<div class="cmd-line"><span class="cmd-comment"># Step 3: Create your first snapshot</span></div>
+							<div class="cmd-line"><span class="cmd-prompt">$</span> <span class="cmd-text">php artisan tyro-checkpoint:create</span></div>
+							<br>
+							<div class="cmd-line success-line"><span class="cmd-success">✓ Success:</span> Checkpoint successfully created!</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="scaffold-benefits">
+			<!-- <div class="scaffold-benefits">
 				<div class="scaffold-benefit">
 					<div class="benefit-icon">
 						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
 						</svg>
 					</div>
-					<h4>Zero Friction</h4>
-					<p>Works immediately after installation with your existing Laravel SQLite configuration.</p>
+					<h4>Works Instantly</h4>
+					<p>No complicated setup needed. Just install it and it automatically finds your database and is ready to use.</p>
 				</div>
 				<div class="scaffold-benefit">
 					<div class="benefit-icon">
@@ -514,8 +493,8 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 							<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
 						</svg>
 					</div>
-					<h4>Developer Experience</h4>
-					<p>Built for the command line. Intuitive arg and option names that match your workflow.</p>
+					<h4>Easy to Use</h4>
+					<p>Made for the command line you already know. The commands are simple to remember and feel natural to type.</p>
 				</div>
 				<div class="scaffold-benefit">
 					<div class="benefit-icon">
@@ -523,10 +502,10 @@ $ php artisan tyro-checkpoint:restore pre_migration_v4
 							<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
 						</svg>
 					</div>
-					<h4>Rock Solid</h4>
-					<p>Uses atomic file copy operations to ensure snapshots are perfectly captured without data loss.</p>
+					<h4>Super Safe</h4>
+					<p>Copies your database files directly to make sure nothing gets lost or corrupted. Your safety backups are always perfect.</p>
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</section>
 
