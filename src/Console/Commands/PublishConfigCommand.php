@@ -7,14 +7,13 @@ use Illuminate\Support\Facades\File;
 
 /**
  * PublishConfigCommand
- * 
+ *
  * Publishes the Tyro Checkpoint configuration file to the application's config directory.
- * 
+ *
  * Usage:
  *   php artisan tyro-checkpoint:publish-config
  */
-class PublishConfigCommand extends Command
-{
+class PublishConfigCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -28,19 +27,20 @@ class PublishConfigCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
-    {
-        $sourcePath = __DIR__ . '/../../config/checkpoint.php';
+    public function handle(): int {
+        $sourcePath = __DIR__.'/../../config/checkpoint.php';
         $destinationPath = config_path('checkpoint.php');
 
-        if (!File::exists($sourcePath)) {
+        if (! File::exists($sourcePath)) {
             $this->error("Configuration file not found at: {$sourcePath}");
+
             return self::FAILURE;
         }
 
         if (File::exists($destinationPath)) {
-            if (!$this->confirm("Configuration file already exists. Overwrite?")) {
+            if (! $this->confirm('Configuration file already exists. Overwrite?')) {
                 $this->info('Publication cancelled.');
+
                 return self::SUCCESS;
             }
         }

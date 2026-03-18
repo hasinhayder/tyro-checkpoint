@@ -2,9 +2,9 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
-use Illuminate\Console\Command;
-use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
+use HasinHayder\TyroCheckpoint\Services\CheckpointService;
+use Illuminate\Console\Command;
 
 /**
  * CheckpointRestoreCommand
@@ -16,8 +16,7 @@ use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
  *   php artisan tyro-checkpoint:restore 1
  *   php artisan tyro-checkpoint:restore my_checkpoint
  */
-class CheckpointRestoreCommand extends Command
-{
+class CheckpointRestoreCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -31,18 +30,18 @@ class CheckpointRestoreCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(CheckpointService $service): int
-    {
+    public function handle(CheckpointService $service): int {
         try {
             // Get the identifier (ID or name)
             $identifier = $this->argument('identifier');
 
             // If no identifier provided, ask the user to select one
-            if (!$identifier) {
+            if (! $identifier) {
                 $checkpoints = $service->list();
 
                 if ($checkpoints->isEmpty()) {
                     $this->error('✗ No checkpoints found.');
+
                     return self::FAILURE;
                 }
 
@@ -63,12 +62,14 @@ class CheckpointRestoreCommand extends Command
                 // Handle quit
                 if ($input === '0' || $input === 0) {
                     $this->info('Operation cancelled.');
+
                     return self::SUCCESS;
                 }
 
                 // Validate input is a valid ID
-                if (!is_numeric($input) || !in_array((int) $input, $availableIds)) {
+                if (! is_numeric($input) || ! in_array((int) $input, $availableIds)) {
                     $this->error("✗ Invalid checkpoint ID: {$input}");
+
                     return self::FAILURE;
                 }
 
@@ -78,24 +79,25 @@ class CheckpointRestoreCommand extends Command
             // Find the checkpoint first to display info
             $checkpoint = $service->find($identifier);
 
-            if (!$checkpoint) {
+            if (! $checkpoint) {
                 $this->error("✗ Checkpoint not found: {$identifier}");
                 $this->line('');
                 $this->line('List available checkpoints with:');
                 $this->line('  php artisan tyro-checkpoint:list');
+
                 return self::FAILURE;
             }
 
             // Show checkpoint info and ask for confirmation
             $this->warn('⚠ WARNING: This will replace your current database!');
             $this->line('');
-            $this->line("Checkpoint to restore:");
+            $this->line('Checkpoint to restore:');
             $this->line("  ID:      {$checkpoint->id}");
             $this->line("  Name:    {$checkpoint->name}");
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
             if ($checkpoint->encrypted) {
-                $this->line("  Status:  <comment>Encrypted</comment>");
+                $this->line('  Status:  <comment>Encrypted</comment>');
             }
             if ($checkpoint->note) {
                 $this->line("  Note:    {$checkpoint->note}");
@@ -103,8 +105,9 @@ class CheckpointRestoreCommand extends Command
             $this->line('');
 
             // Ask for confirmation
-            if (!$this->confirm('Do you want to proceed?', false)) {
+            if (! $this->confirm('Do you want to proceed?', false)) {
                 $this->info('Restore cancelled.');
+
                 return self::SUCCESS;
             }
 
@@ -115,17 +118,19 @@ class CheckpointRestoreCommand extends Command
             // Success message
             $this->info("✓ Checkpoint '{$checkpoint->name}' restored successfully!");
             $this->line('');
-            $this->line("Note: This checkpoint is still available and can be restored again.");
+            $this->line('Note: This checkpoint is still available and can be restored again.');
             $this->line('');
 
             return self::SUCCESS;
 
         } catch (CheckpointException $e) {
             $this->error("✗ {$e->getMessage()}");
+
             return self::FAILURE;
 
         } catch (\Exception $e) {
             $this->error("✗ An unexpected error occurred: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
@@ -133,20 +138,18 @@ class CheckpointRestoreCommand extends Command
     /**
      * Truncate note for display purposes.
      */
-    private function truncateNote(string $note, int $maxLength = 20): string
-    {
+    private function truncateNote(string $note, int $maxLength = 20): string {
         if (strlen($note) <= $maxLength) {
             return $note;
         }
 
-        return substr($note, 0, $maxLength) . '...';
+        return substr($note, 0, $maxLength).'...';
     }
 
     /**
      * Format checkpoints data for table display.
      */
-    private function formatTableRows($checkpoints, $service): array
-    {
+    private function formatTableRows($checkpoints, $service): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
             $name = $checkpoint->name;

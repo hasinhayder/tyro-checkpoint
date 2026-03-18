@@ -3,11 +3,10 @@
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
-class CheckpointGenerateKeyCommand extends Command
-{
+class CheckpointGenerateKeyCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -21,19 +20,19 @@ class CheckpointGenerateKeyCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
-    {
+    public function handle(): int {
         $path = base_path('.env');
-        
+
         if (File::exists($path)) {
             $content = File::get($path);
             if (Str::contains($content, 'TYRO_CHECKPOINT_ENCRYPTION_KEY=')) {
                 $this->warn('⚠ WARNING: An encryption key already exists in your .env file.');
                 $this->line('  Replacing it will make previously encrypted checkpoints impossible to restore.');
                 $this->line('');
-                
-                if (!$this->confirm('Do you really want to generate a new key and replace the existing one?', false)) {
+
+                if (! $this->confirm('Do you really want to generate a new key and replace the existing one?', false)) {
                     $this->info('Operation cancelled.');
+
                     return self::SUCCESS;
                 }
             }
@@ -42,11 +41,11 @@ class CheckpointGenerateKeyCommand extends Command
         $key = Str::random(32);
 
         if ($this->writeNewEnvironmentFileWith($key)) {
-            $this->info("✓ Encryption key generated and saved to .env file successfully.");
+            $this->info('✓ Encryption key generated and saved to .env file successfully.');
             $this->line("  Run 'php artisan tyro-checkpoint:create --encrypt' to create encrypted checkpoints.");
         } else {
-            $this->error("✗ Failed to save encryption key to .env file.");
-            $this->line("  Please add the following line manually to your .env file:");
+            $this->error('✗ Failed to save encryption key to .env file.');
+            $this->line('  Please add the following line manually to your .env file:');
             $this->line("  TYRO_CHECKPOINT_ENCRYPTION_KEY=\"{$key}\"");
         }
 
@@ -56,11 +55,10 @@ class CheckpointGenerateKeyCommand extends Command
     /**
      * Write a new environment file with the given key.
      */
-    protected function writeNewEnvironmentFileWith(string $key): bool
-    {
+    protected function writeNewEnvironmentFileWith(string $key): bool {
         $path = base_path('.env');
 
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             return false;
         }
 

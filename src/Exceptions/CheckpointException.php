@@ -6,9 +6,7 @@ use Exception;
 
 /**
  * CheckpointException
- * 
+ *
  * Custom exception for checkpoint-related errors.
  */
-class CheckpointException extends Exception
-{
-}
+class CheckpointException extends Exception {}

@@ -2,11 +2,12 @@
 
 namespace HasinHayder\TyroCheckpoint\Services;
 
+use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
+use HasinHayder\TyroCheckpoint\Models\Checkpoint;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Encryption\Encrypter;
-use HasinHayder\TyroCheckpoint\Models\Checkpoint;
-use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 
 /**
  * CheckpointService
@@ -17,8 +18,7 @@ use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
  * Checkpoint metadata is stored in a JSON file outside the database
  * to prevent loss of checkpoint history when restoring.
  */
-class CheckpointService
-{
+class CheckpointService {
     /**
      * Maximum allowed length for checkpoint names.
      */
@@ -32,21 +32,18 @@ class CheckpointService
     /**
      * Validate a checkpoint name for security.
      *
-     * @param string $name
-     * @return void
      * @throws CheckpointException
      */
-    protected function validateCheckpointName(string $name): void
-    {
+    protected function validateCheckpointName(string $name): void {
         // Check length
         if (strlen($name) > self::MAX_NAME_LENGTH) {
             throw new CheckpointException(
-                "Checkpoint name exceeds maximum length of " . self::MAX_NAME_LENGTH . " characters."
+                'Checkpoint name exceeds maximum length of '.self::MAX_NAME_LENGTH.' characters.'
             );
         }
 
         // Whitelist validation: only alphanumeric, underscores, and hyphens
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $name)) {
+        if (! preg_match('/^[a-zA-Z0-9_-]+$/', $name)) {
             throw new CheckpointException(
                 "Invalid checkpoint name '{$name}'. Use only letters, numbers, underscores, and hyphens."
             );
@@ -56,15 +53,12 @@ class CheckpointService
     /**
      * Validate a checkpoint note for security.
      *
-     * @param string|null $note
-     * @return void
      * @throws CheckpointException
      */
-    protected function validateCheckpointNote(?string $note): void
-    {
+    protected function validateCheckpointNote(?string $note): void {
         if ($note !== null && strlen($note) > self::MAX_NOTE_LENGTH) {
             throw new CheckpointException(
-                "Checkpoint note exceeds maximum length of " . self::MAX_NOTE_LENGTH . " characters."
+                'Checkpoint note exceeds maximum length of '.self::MAX_NOTE_LENGTH.' characters.'
             );
         }
     }
@@ -73,12 +67,9 @@ class CheckpointService
      * Validate that a checkpoint path is within the allowed storage directory.
      * This prevents path traversal attacks.
      *
-     * @param string $checkpointPath
-     * @return void
      * @throws CheckpointException
      */
-    protected function validateCheckpointPath(string $checkpointPath): void
-    {
+    protected function validateCheckpointPath(string $checkpointPath): void {
         $storagePath = realpath($this->getCheckpointStoragePath());
         $realCheckpointPath = realpath(dirname($checkpointPath));
 
@@ -88,17 +79,17 @@ class CheckpointService
         }
 
         // Check if the checkpoint path is within storage
-        if ($realCheckpointPath !== false && !str_starts_with($realCheckpointPath, $storagePath)) {
+        if ($realCheckpointPath !== false && ! str_starts_with($realCheckpointPath, $storagePath)) {
             throw new CheckpointException(
-                "Invalid checkpoint path detected. Path traversal attempt blocked."
+                'Invalid checkpoint path detected. Path traversal attempt blocked.'
             );
         }
     }
+
     /**
      * Get the path to the checkpoint storage directory.
      */
-    public function getCheckpointStoragePath(): string
-    {
+    public function getCheckpointStoragePath(): string {
         // Use the configured storage path, falling back to default if not set
         return config('tyro-checkpoint.storage_path', storage_path('tyro-checkpoints'));
     }
@@ -106,23 +97,20 @@ class CheckpointService
     /**
      * Get the path to the checkpoints metadata JSON file.
      */
-    public function getCheckpointsFilePath(): string
-    {
-        return $this->getCheckpointStoragePath() . '/checkpoints.json';
+    public function getCheckpointsFilePath(): string {
+        return $this->getCheckpointStoragePath().'/checkpoints.json';
     }
 
     /**
      * Load all checkpoints from the JSON file.
      * Automatically attempts to restore from backup if the main file is corrupted.
      *
-     * @return array
      * @throws CheckpointException
      */
-    protected function loadCheckpoints(): array
-    {
+    protected function loadCheckpoints(): array {
         $filePath = $this->getCheckpointsFilePath();
 
-        if (!File::exists($filePath)) {
+        if (! File::exists($filePath)) {
             return [];
         }
 
@@ -140,13 +128,14 @@ class CheckpointService
                 if (json_last_error() === JSON_ERROR_NONE) {
                     // Backup is valid - restore it
                     File::copy($backupPath, $filePath);
+
                     return $backupData ?? [];
                 }
             }
 
             // No valid backup available
             throw new CheckpointException(
-                'Checkpoints file is corrupted and no valid backup exists. ' .
+                'Checkpoints file is corrupted and no valid backup exists. '.
                 'You may need to delete the corrupted file and start fresh.'
             );
         }
@@ -158,12 +147,9 @@ class CheckpointService
      * Save checkpoints to the JSON file using atomic write.
      * This ensures the JSON file is never left in a corrupted state.
      *
-     * @param array $checkpoints
-     * @return void
      * @throws CheckpointException
      */
-    protected function saveCheckpoints(array $checkpoints): void
-    {
+    protected function saveCheckpoints(array $checkpoints): void {
         $filePath = $this->getCheckpointsFilePath();
 
         // Create backup before modification (if original exists)
@@ -174,7 +160,7 @@ class CheckpointService
 
         if ($json === false) {
             throw new CheckpointException(
-                'Failed to encode checkpoints to JSON: ' . json_last_error_msg()
+                'Failed to encode checkpoints to JSON: '.json_last_error_msg()
             );
         }
 
@@ -187,7 +173,7 @@ class CheckpointService
         }
 
         // Use atomic write: write to temp file first, then rename
-        $tempFile = $filePath . '.tmp.' . uniqid();
+        $tempFile = $filePath.'.tmp.'.uniqid();
 
         try {
             // Write to temporary file
@@ -198,7 +184,7 @@ class CheckpointService
             }
 
             // Atomic rename (on most filesystems, rename is atomic)
-            if (!rename($tempFile, $filePath)) {
+            if (! rename($tempFile, $filePath)) {
                 throw new CheckpointException(
                     "Failed to save checkpoints file: could not rename temp file to {$filePath}"
                 );
@@ -213,16 +199,13 @@ class CheckpointService
 
     /**
      * Create a backup of the current checkpoints file before modification.
-     *
-     * @return void
      */
-    protected function createBackup(): void
-    {
+    protected function createBackup(): void {
         $filePath = $this->getCheckpointsFilePath();
         $backupPath = $this->getBackupFilePath();
 
         // Only backup if original file exists and is valid
-        if (!File::exists($filePath)) {
+        if (! File::exists($filePath)) {
             return;
         }
 
@@ -242,12 +225,9 @@ class CheckpointService
 
     /**
      * Get the path to the backup file.
-     *
-     * @return string
      */
-    protected function getBackupFilePath(): string
-    {
-        return $this->getCheckpointStoragePath() . '/checkpoints.json.bak';
+    protected function getBackupFilePath(): string {
+        return $this->getCheckpointStoragePath().'/checkpoints.json.bak';
     }
 
     /**
@@ -255,14 +235,14 @@ class CheckpointService
      * This is a public method that can be called for recovery.
      *
      * @return bool True if restored successfully, false if no backup exists
+     *
      * @throws CheckpointException
      */
-    public function restoreFromBackup(): bool
-    {
+    public function restoreFromBackup(): bool {
         $backupPath = $this->getBackupFilePath();
         $filePath = $this->getCheckpointsFilePath();
 
-        if (!File::exists($backupPath)) {
+        if (! File::exists($backupPath)) {
             return false;
         }
 
@@ -284,33 +264,28 @@ class CheckpointService
 
     /**
      * Check if a backup exists.
-     *
-     * @return bool
      */
-    public function hasBackup(): bool
-    {
+    public function hasBackup(): bool {
         return File::exists($this->getBackupFilePath());
     }
 
     /**
      * Ensure the checkpoint storage directory exists.
      */
-    protected function ensureStorageDirectoryExists(): void
-    {
+    protected function ensureStorageDirectoryExists(): void {
         $path = $this->getCheckpointStoragePath();
-        
-        if (!File::exists($path)) {
+
+        if (! File::exists($path)) {
             File::makeDirectory($path, 0755, true);
         }
     }
 
     /**
      * Get the current SQLite database file path.
-     * 
+     *
      * @throws CheckpointException
      */
-    public function getDatabasePath(): string
-    {
+    public function getDatabasePath(): string {
         $connection = config('database.default');
         $driver = config("database.connections.{$connection}.driver");
 
@@ -323,13 +298,13 @@ class CheckpointService
 
         $databasePath = config("database.connections.{$connection}.database");
 
-        if (!$databasePath || $databasePath === ':memory:') {
+        if (! $databasePath || $databasePath === ':memory:') {
             throw new CheckpointException(
                 'In-memory SQLite databases are not supported for checkpoints.'
             );
         }
 
-        if (!File::exists($databasePath)) {
+        if (! File::exists($databasePath)) {
             throw new CheckpointException(
                 "Database file not found: {$databasePath}"
             );
@@ -341,20 +316,19 @@ class CheckpointService
     /**
      * Create a new checkpoint.
      *
-     * @param string|null $name Optional checkpoint name
-     * @param string|null $note Optional note for the checkpoint
-     * @param bool $encrypt Whether to encrypt the checkpoint
-     * @return Checkpoint
+     * @param  string|null  $name  Optional checkpoint name
+     * @param  string|null  $note  Optional note for the checkpoint
+     * @param  bool  $encrypt  Whether to encrypt the checkpoint
+     *
      * @throws CheckpointException
      */
-    public function create(?string $name = null, ?string $note = null, bool $encrypt = false): Checkpoint
-    {
+    public function create(?string $name = null, ?string $note = null, bool $encrypt = false): Checkpoint {
         $this->ensureStorageDirectoryExists();
 
         // Check if encryption is requested
         if ($encrypt) {
             $encryptionKey = $this->getEncryptionKey();
-            if (!$encryptionKey) {
+            if (! $encryptionKey) {
                 throw new CheckpointException(
                     "Encryption key not found in the config or env file. Please run 'php artisan tyro-checkpoint:generate-key' first."
                 );
@@ -362,8 +336,8 @@ class CheckpointService
         }
 
         // Generate checkpoint name if not provided
-        if (!$name) {
-            $name = 'checkpoint_' . date('Y_m_d_His');
+        if (! $name) {
+            $name = 'checkpoint_'.date('Y_m_d_His');
         }
 
         // Validate checkpoint name for security (prevents path traversal)
@@ -388,19 +362,19 @@ class CheckpointService
         $sourcePath = $this->getDatabasePath();
 
         // Create checkpoint file path
-        $checkpointPath = $this->getCheckpointStoragePath() . '/' . $name . '.sqlite';
+        $checkpointPath = $this->getCheckpointStoragePath().'/'.$name.'.sqlite';
 
         // Validate the checkpoint path is within storage (defense in depth)
         $this->validateCheckpointPath($checkpointPath);
 
         // Copy/Encrypt the database file to create the checkpoint
         if ($encrypt) {
-            if (!$this->encryptFile($sourcePath, $checkpointPath)) {
+            if (! $this->encryptFile($sourcePath, $checkpointPath)) {
                 throw new CheckpointException(
                     "Failed to create encrypted checkpoint file: {$checkpointPath}"
                 );
             }
-        } elseif (!File::copy($sourcePath, $checkpointPath)) {
+        } elseif (! File::copy($sourcePath, $checkpointPath)) {
             throw new CheckpointException(
                 "Failed to create checkpoint file: {$checkpointPath}"
             );
@@ -442,16 +416,15 @@ class CheckpointService
 
     /**
      * Get all checkpoints ordered by creation date (newest first).
-     * 
-     * @return \Illuminate\Support\Collection
+     *
+     * @return Collection
      */
-    public function list()
-    {
+    public function list() {
         $checkpoints = $this->loadCheckpoints();
 
         // Convert to Checkpoint models and sort by created_at descending
         $collection = collect($checkpoints)
-            ->map(fn($data) => new Checkpoint($data))
+            ->map(fn ($data) => new Checkpoint($data))
             ->sortByDesc('created_at')
             ->values();
 
@@ -460,12 +433,10 @@ class CheckpointService
 
     /**
      * Find a checkpoint by ID or name.
-     * 
-     * @param string|int $identifier Checkpoint ID or name
-     * @return Checkpoint|null
+     *
+     * @param  string|int  $identifier  Checkpoint ID or name
      */
-    public function find($identifier): ?Checkpoint
-    {
+    public function find($identifier): ?Checkpoint {
         $checkpoints = $this->loadCheckpoints();
 
         foreach ($checkpoints as $data) {
@@ -481,23 +452,22 @@ class CheckpointService
     /**
      * Restore a checkpoint by replacing the current database with it.
      *
-     * @param string $identifier Checkpoint ID or name
-     * @return Checkpoint
+     * @param  string  $identifier  Checkpoint ID or name
+     *
      * @throws CheckpointException
      */
-    public function restore(string $identifier): Checkpoint
-    {
+    public function restore(string $identifier): Checkpoint {
         // Find the checkpoint
         $checkpoint = $this->find($identifier);
 
-        if (!$checkpoint) {
+        if (! $checkpoint) {
             throw new CheckpointException(
                 "Checkpoint not found: {$identifier}"
             );
         }
 
         // Verify checkpoint file exists
-        if (!File::exists($checkpoint->path)) {
+        if (! File::exists($checkpoint->path)) {
             throw new CheckpointException(
                 "Checkpoint file not found: {$checkpoint->path}"
             );
@@ -514,12 +484,12 @@ class CheckpointService
 
         // Replace the current database with the checkpoint
         if ($checkpoint->encrypted) {
-            if (!$this->decryptFile($checkpoint->path, $databasePath)) {
+            if (! $this->decryptFile($checkpoint->path, $databasePath)) {
                 throw new CheckpointException(
                     "Failed to restore encrypted checkpoint. Could not decrypt file to: {$databasePath}"
                 );
             }
-        } elseif (!File::copy($checkpoint->path, $databasePath)) {
+        } elseif (! File::copy($checkpoint->path, $databasePath)) {
             throw new CheckpointException(
                 "Failed to restore checkpoint. Could not copy file to: {$databasePath}"
             );
@@ -534,16 +504,15 @@ class CheckpointService
     /**
      * Delete a checkpoint and its associated file.
      *
-     * @param string $identifier Checkpoint ID or name
-     * @return bool
+     * @param  string  $identifier  Checkpoint ID or name
+     *
      * @throws CheckpointException
      */
-    public function delete(string $identifier): bool
-    {
+    public function delete(string $identifier): bool {
         // Find the checkpoint
         $checkpoint = $this->find($identifier);
 
-        if (!$checkpoint) {
+        if (! $checkpoint) {
             throw new CheckpointException(
                 "Checkpoint not found: {$identifier}"
             );
@@ -566,7 +535,7 @@ class CheckpointService
 
         // Load checkpoints and remove the matching one
         $checkpoints = $this->loadCheckpoints();
-        $filtered = array_values(array_filter($checkpoints, function($data) use ($checkpoint) {
+        $filtered = array_values(array_filter($checkpoints, function ($data) use ($checkpoint) {
             return $data['id'] !== $checkpoint->id;
         }));
 
@@ -579,16 +548,15 @@ class CheckpointService
     /**
      * Lock a checkpoint to prevent deletion.
      *
-     * @param string $identifier Checkpoint ID or name
-     * @return Checkpoint
+     * @param  string  $identifier  Checkpoint ID or name
+     *
      * @throws CheckpointException
      */
-    public function lock(string $identifier): Checkpoint
-    {
+    public function lock(string $identifier): Checkpoint {
         // Find the checkpoint
         $checkpoint = $this->find($identifier);
 
-        if (!$checkpoint) {
+        if (! $checkpoint) {
             throw new CheckpointException(
                 "Checkpoint not found: {$identifier}"
             );
@@ -606,7 +574,7 @@ class CheckpointService
             }
         }
 
-        if (!$updated) {
+        if (! $updated) {
             throw new CheckpointException(
                 "Failed to lock checkpoint: {$identifier}"
             );
@@ -622,16 +590,15 @@ class CheckpointService
     /**
      * Unlock a checkpoint to allow deletion.
      *
-     * @param string $identifier Checkpoint ID or name
-     * @return Checkpoint
+     * @param  string  $identifier  Checkpoint ID or name
+     *
      * @throws CheckpointException
      */
-    public function unlock(string $identifier): Checkpoint
-    {
+    public function unlock(string $identifier): Checkpoint {
         // Find the checkpoint
         $checkpoint = $this->find($identifier);
 
-        if (!$checkpoint) {
+        if (! $checkpoint) {
             throw new CheckpointException(
                 "Checkpoint not found: {$identifier}"
             );
@@ -649,7 +616,7 @@ class CheckpointService
             }
         }
 
-        if (!$updated) {
+        if (! $updated) {
             throw new CheckpointException(
                 "Failed to unlock checkpoint: {$identifier}"
             );
@@ -665,17 +632,16 @@ class CheckpointService
     /**
      * Update the note for a checkpoint.
      *
-     * @param string $identifier Checkpoint ID or name
-     * @param string|null $note The note to set (null to remove)
-     * @return Checkpoint
+     * @param  string  $identifier  Checkpoint ID or name
+     * @param  string|null  $note  The note to set (null to remove)
+     *
      * @throws CheckpointException
      */
-    public function updateNote(string $identifier, ?string $note): Checkpoint
-    {
+    public function updateNote(string $identifier, ?string $note): Checkpoint {
         // Find the checkpoint
         $checkpoint = $this->find($identifier);
 
-        if (!$checkpoint) {
+        if (! $checkpoint) {
             throw new CheckpointException(
                 "Checkpoint not found: {$identifier}"
             );
@@ -696,7 +662,7 @@ class CheckpointService
             }
         }
 
-        if (!$updated) {
+        if (! $updated) {
             throw new CheckpointException(
                 "Failed to update note for checkpoint: {$identifier}"
             );
@@ -712,16 +678,14 @@ class CheckpointService
     /**
      * Get the encryption key from config.
      */
-    protected function getEncryptionKey(): ?string
-    {
+    protected function getEncryptionKey(): ?string {
         return config('tyro-checkpoint.encryption_key');
     }
 
     /**
      * Encrypt a file.
      */
-    protected function encryptFile(string $sourcePath, string $destinationPath): bool
-    {
+    protected function encryptFile(string $sourcePath, string $destinationPath): bool {
         $key = $this->getEncryptionKey();
         $encrypter = new Encrypter($key, config('app.cipher', 'AES-256-CBC'));
 
@@ -734,25 +698,24 @@ class CheckpointService
     /**
      * Decrypt a file.
      */
-    protected function decryptFile(string $sourcePath, string $destinationPath): bool
-    {
+    protected function decryptFile(string $sourcePath, string $destinationPath): bool {
         $key = $this->getEncryptionKey();
-        
-        if (!$key) {
-             throw new CheckpointException(
-                "Encryption key not found. Cannot decrypt checkpoint."
+
+        if (! $key) {
+            throw new CheckpointException(
+                'Encryption key not found. Cannot decrypt checkpoint.'
             );
         }
 
         $encrypter = new Encrypter($key, config('app.cipher', 'AES-256-CBC'));
 
         $content = File::get($sourcePath);
-        
+
         try {
             $decryptedContent = $encrypter->decrypt($content);
         } catch (\Exception $e) {
             throw new CheckpointException(
-                "Failed to decrypt checkpoint. The encryption key might be incorrect."
+                'Failed to decrypt checkpoint. The encryption key might be incorrect.'
             );
         }
 
@@ -761,18 +724,14 @@ class CheckpointService
 
     /**
      * Get human-readable file size.
-     * 
-     * @param int $bytes
-     * @return string
      */
-    public function formatFileSize(int $bytes): string
-    {
+    public function formatFileSize(int $bytes): string {
         $units = ['B', 'KB', 'MB', 'GB'];
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
         $bytes /= (1 << (10 * $pow));
 
-        return round($bytes, 2) . ' ' . $units[$pow];
+        return round($bytes, 2).' '.$units[$pow];
     }
 }

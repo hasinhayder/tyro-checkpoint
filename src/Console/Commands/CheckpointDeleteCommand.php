@@ -2,9 +2,9 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
-use Illuminate\Console\Command;
-use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
+use HasinHayder\TyroCheckpoint\Services\CheckpointService;
+use Illuminate\Console\Command;
 
 /**
  * CheckpointDeleteCommand
@@ -16,8 +16,7 @@ use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
  *   php artisan tyro-checkpoint:delete 1
  *   php artisan tyro-checkpoint:delete my_checkpoint
  */
-class CheckpointDeleteCommand extends Command
-{
+class CheckpointDeleteCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -31,18 +30,18 @@ class CheckpointDeleteCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(CheckpointService $service): int
-    {
+    public function handle(CheckpointService $service): int {
         try {
             // Get the identifier (ID or name)
             $identifier = $this->argument('identifier');
 
             // If no identifier provided, ask the user to select one
-            if (!$identifier) {
+            if (! $identifier) {
                 $checkpoints = $service->list();
 
                 if ($checkpoints->isEmpty()) {
                     $this->error('✗ No checkpoints found.');
+
                     return self::FAILURE;
                 }
 
@@ -63,12 +62,14 @@ class CheckpointDeleteCommand extends Command
                 // Handle quit
                 if ($input === '0' || $input === 0) {
                     $this->info('Operation cancelled.');
+
                     return self::SUCCESS;
                 }
 
                 // Validate input is a valid ID
-                if (!is_numeric($input) || !in_array((int) $input, $availableIds)) {
+                if (! is_numeric($input) || ! in_array((int) $input, $availableIds)) {
                     $this->error("✗ Invalid checkpoint ID: {$input}");
+
                     return self::FAILURE;
                 }
 
@@ -78,22 +79,23 @@ class CheckpointDeleteCommand extends Command
             // Find the checkpoint first to display info
             $checkpoint = $service->find($identifier);
 
-            if (!$checkpoint) {
+            if (! $checkpoint) {
                 $this->error("✗ Checkpoint not found: {$identifier}");
                 $this->line('');
                 $this->line('List available checkpoints with:');
                 $this->line('  php artisan tyro-checkpoint:list');
+
                 return self::FAILURE;
             }
 
             // Show checkpoint info and ask for confirmation
-            $this->line("Checkpoint to delete:");
+            $this->line('Checkpoint to delete:');
             $this->line("  ID:      {$checkpoint->id}");
             $this->line("  Name:    {$checkpoint->name}");
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
             if ($checkpoint->locked) {
-                $this->line("  Status:  <comment>Locked</comment>");
+                $this->line('  Status:  <comment>Locked</comment>');
             }
             if ($checkpoint->note) {
                 $this->line("  Note:    {$checkpoint->note}");
@@ -101,8 +103,9 @@ class CheckpointDeleteCommand extends Command
             $this->line('');
 
             // Ask for confirmation
-            if (!$this->confirm('Are you sure you want to delete this checkpoint?', false)) {
+            if (! $this->confirm('Are you sure you want to delete this checkpoint?', false)) {
                 $this->info('Delete cancelled.');
+
                 return self::SUCCESS;
             }
 
@@ -117,10 +120,12 @@ class CheckpointDeleteCommand extends Command
 
         } catch (CheckpointException $e) {
             $this->error("✗ {$e->getMessage()}");
+
             return self::FAILURE;
 
         } catch (\Exception $e) {
             $this->error("✗ An unexpected error occurred: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
@@ -128,20 +133,18 @@ class CheckpointDeleteCommand extends Command
     /**
      * Truncate note for display purposes.
      */
-    private function truncateNote(string $note, int $maxLength = 30): string
-    {
+    private function truncateNote(string $note, int $maxLength = 30): string {
         if (strlen($note) <= $maxLength) {
             return $note;
         }
 
-        return substr($note, 0, $maxLength) . '...';
+        return substr($note, 0, $maxLength).'...';
     }
 
     /**
      * Format checkpoints data for table display.
      */
-    private function formatTableRows($checkpoints, $service): array
-    {
+    private function formatTableRows($checkpoints, $service): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
             $name = $checkpoint->name;

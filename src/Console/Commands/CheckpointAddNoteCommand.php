@@ -2,9 +2,9 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
-use Illuminate\Console\Command;
-use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
+use HasinHayder\TyroCheckpoint\Services\CheckpointService;
+use Illuminate\Console\Command;
 
 /**
  * CheckpointAddNoteCommand
@@ -15,8 +15,7 @@ use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
  *   php artisan tyro-checkpoint:add-note
  *   php artisan tyro-checkpoint:add-note {id}
  */
-class CheckpointAddNoteCommand extends Command
-{
+class CheckpointAddNoteCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -30,36 +29,39 @@ class CheckpointAddNoteCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(CheckpointService $service): int
-    {
+    public function handle(CheckpointService $service): int {
         try {
             // Get all checkpoints for selection
             $checkpoints = $service->list();
 
             if ($checkpoints->isEmpty()) {
                 $this->error('✗ No checkpoints found.');
+
                 return self::FAILURE;
             }
 
             // Get the checkpoint identifier
             $identifier = $this->getCheckpointIdentifier($checkpoints);
 
-            if (!$identifier) {
+            if (! $identifier) {
                 $this->error('✗ No checkpoint selected.');
+
                 return self::FAILURE;
             }
 
             // Validate identifier format
-            if (!$this->isValidIdentifier($identifier)) {
+            if (! $this->isValidIdentifier($identifier)) {
                 $this->error("✗ Invalid checkpoint identifier: {$identifier}");
+
                 return self::FAILURE;
             }
 
             // Find the checkpoint
             $checkpoint = $service->find($identifier);
 
-            if (!$checkpoint) {
+            if (! $checkpoint) {
                 $this->error("✗ Checkpoint not found: {$identifier}");
+
                 return self::FAILURE;
             }
 
@@ -67,8 +69,9 @@ class CheckpointAddNoteCommand extends Command
             $note = $this->getNewNoteFromUser($checkpoint);
 
             // Validate note length if provided
-            if ($note !== null && !$this->isValidNote($note)) {
+            if ($note !== null && ! $this->isValidNote($note)) {
                 $this->error('✗ Note exceeds maximum length of 1000 characters.');
+
                 return self::FAILURE;
             }
 
@@ -82,10 +85,12 @@ class CheckpointAddNoteCommand extends Command
 
         } catch (CheckpointException $e) {
             $this->error("✗ {$e->getMessage()}");
+
             return self::FAILURE;
 
         } catch (\Exception $e) {
             $this->error("✗ An unexpected error occurred: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
@@ -93,8 +98,7 @@ class CheckpointAddNoteCommand extends Command
     /**
      * Get checkpoint identifier from argument or user selection.
      */
-    private function getCheckpointIdentifier($checkpoints): ?string
-    {
+    private function getCheckpointIdentifier($checkpoints): ?string {
         $identifier = $this->argument('id');
 
         if ($identifier) {
@@ -112,7 +116,7 @@ class CheckpointAddNoteCommand extends Command
         foreach ($checkpoints as $checkpoint) {
             $label = "#{$checkpoint->id} - {$checkpoint->name}";
             if ($checkpoint->note) {
-                $label .= " (Current note: " . $this->truncateNote($checkpoint->note) . ")";
+                $label .= ' (Current note: '.$this->truncateNote($checkpoint->note).')';
             }
             $options[$index] = $label;
             $indexMap[$index] = $checkpoint->id;
@@ -133,18 +137,18 @@ class CheckpointAddNoteCommand extends Command
 
         // Find the index that corresponds to the selected label
         $selectedIndex = array_search($selectedLabel, $options);
+
         return $indexMap[$selectedIndex] ?? null;
     }
 
     /**
      * Get the new note from user input.
      */
-    private function getNewNoteFromUser($checkpoint): ?string
-    {
+    private function getNewNoteFromUser($checkpoint): ?string {
         // Show current note if exists
         if ($checkpoint->note) {
             $this->line('');
-            $this->info('Current note: ' . $this->truncateNote($checkpoint->note));
+            $this->info('Current note: '.$this->truncateNote($checkpoint->note));
         }
 
         // Ask for the new note
@@ -162,8 +166,7 @@ class CheckpointAddNoteCommand extends Command
     /**
      * Display success message after updating the note.
      */
-    private function displaySuccessMessage($checkpoint, ?string $note): void
-    {
+    private function displaySuccessMessage($checkpoint, ?string $note): void {
         $this->line('');
         if ($note) {
             $this->info("✓ Note updated successfully for checkpoint: {$checkpoint->name}");
@@ -177,20 +180,18 @@ class CheckpointAddNoteCommand extends Command
     /**
      * Truncate note for display purposes.
      */
-    private function truncateNote(string $note, int $maxLength = 50): string
-    {
+    private function truncateNote(string $note, int $maxLength = 50): string {
         if (strlen($note) <= $maxLength) {
             return $note;
         }
 
-        return substr($note, 0, $maxLength) . '...';
+        return substr($note, 0, $maxLength).'...';
     }
 
     /**
      * Validate checkpoint identifier format.
      */
-    private function isValidIdentifier($identifier): bool
-    {
+    private function isValidIdentifier($identifier): bool {
         // Check if it's a numeric ID or a valid name
         if (is_numeric($identifier)) {
             return true;
@@ -203,8 +204,7 @@ class CheckpointAddNoteCommand extends Command
     /**
      * Validate note content.
      */
-    private function isValidNote(string $note): bool
-    {
+    private function isValidNote(string $note): bool {
         // Maximum length validation
         return strlen($note) <= 1000;
     }
@@ -212,13 +212,12 @@ class CheckpointAddNoteCommand extends Command
     /**
      * Format checkpoints data for table display.
      */
-    private function formatTableRows($checkpoints): array
-    {
+    private function formatTableRows($checkpoints): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
             $row = [
                 "#{$checkpoint->id}",
-                $checkpoint->name
+                $checkpoint->name,
             ];
 
             if ($checkpoint->note) {

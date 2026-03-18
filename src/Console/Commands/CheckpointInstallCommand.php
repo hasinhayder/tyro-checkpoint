@@ -7,14 +7,13 @@ use Illuminate\Support\Facades\File;
 
 /**
  * CheckpointInstallCommand
- * 
+ *
  * Handles the installation and setup of Tyro Checkpoint package.
- * 
+ *
  * Usage:
  *   php artisan tyro-checkpoint:install
  */
-class CheckpointInstallCommand extends Command
-{
+class CheckpointInstallCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -28,8 +27,7 @@ class CheckpointInstallCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
-    {
+    public function handle(): int {
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
         $this->info('  ║                                        ║');
@@ -40,36 +38,39 @@ class CheckpointInstallCommand extends Command
 
         // Check if using SQLite
         $this->info('Checking database configuration...');
-        
+
         $connection = config('database.default');
         $driver = config("database.connections.{$connection}.driver");
-        
+
         if ($driver !== 'sqlite') {
-            $this->error('   ✗ Current database driver is not SQLite: ' . $driver);
+            $this->error('   ✗ Current database driver is not SQLite: '.$driver);
             $this->error('   Tyro Checkpoint only supports SQLite databases.');
             $this->error('   Please configure SQLite in your .env file:');
             $this->line('');
             $this->line('   DB_CONNECTION=sqlite');
-            $this->line('   DB_DATABASE=' . database_path('database.sqlite'));
+            $this->line('   DB_DATABASE='.database_path('database.sqlite'));
             $this->line('');
+
             return self::FAILURE;
         }
-        
+
         $databasePath = config("database.connections.{$connection}.database");
-        
+
         if ($databasePath === ':memory:') {
             $this->error('   ✗ In-memory SQLite databases are not supported');
             $this->error('   Please configure a file-based SQLite database.');
+
             return self::FAILURE;
         }
-        
-        if (!File::exists($databasePath)) {
-            $this->warn('   ⚠ Database file does not exist: ' . $databasePath);
+
+        if (! File::exists($databasePath)) {
+            $this->warn('   ⚠ Database file does not exist: '.$databasePath);
             if ($this->confirm('Would you like to create it now?', true)) {
                 File::put($databasePath, '');
                 $this->info('   ✓ Database file created');
             } else {
                 $this->error('   Installation cancelled.');
+
                 return self::FAILURE;
             }
         } else {
@@ -81,17 +82,17 @@ class CheckpointInstallCommand extends Command
         // Create checkpoint storage directory
         $this->info('Setting up checkpoint storage...');
         $checkpointPath = storage_path('tyro-checkpoints');
-        
-        if (!File::exists($checkpointPath)) {
+
+        if (! File::exists($checkpointPath)) {
             File::makeDirectory($checkpointPath, 0755, true);
-            $this->info('   ✓ Created checkpoint storage directory: ' . $checkpointPath);
+            $this->info('   ✓ Created checkpoint storage directory: '.$checkpointPath);
         } else {
             $this->info('   ✓ Checkpoint storage directory already exists');
         }
 
         // Create checkpoints.json if it doesn't exist
-        $checkpointsFile = $checkpointPath . '/checkpoints.json';
-        if (!File::exists($checkpointsFile)) {
+        $checkpointsFile = $checkpointPath.'/checkpoints.json';
+        if (! File::exists($checkpointsFile)) {
             File::put($checkpointsFile, '[]');
             $this->info('   ✓ Created checkpoints metadata file: checkpoints.json');
         } else {

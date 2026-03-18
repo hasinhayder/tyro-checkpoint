@@ -23,8 +23,7 @@ use Carbon\Carbon;
  * @property string|null $note
  * @property bool $encrypted
  */
-class Checkpoint
-{
+class Checkpoint {
     /**
      * Checkpoint ID
      */
@@ -68,8 +67,7 @@ class Checkpoint
     /**
      * Create a new Checkpoint instance from array data.
      */
-    public function __construct(array $data)
-    {
+    public function __construct(array $data) {
         $this->id = (int) $data['id'];
         $this->name = $data['name'];
         $this->path = $data['path'];
@@ -85,8 +83,7 @@ class Checkpoint
     /**
      * Convert the checkpoint to an array.
      */
-    public function toArray(): array
-    {
+    public function toArray(): array {
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -102,11 +99,11 @@ class Checkpoint
     /**
      * Magic getter for property access.
      */
-    public function __get(string $name)
-    {
+    public function __get(string $name) {
         if (property_exists($this, $name)) {
             return $this->$name;
         }
+
         return null;
     }
 }

@@ -4,8 +4,7 @@ namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
 use Illuminate\Console\Command;
 
-class VersionCommand extends Command
-{
+class VersionCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -19,10 +18,9 @@ class VersionCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
-    {
-        $version = '1.3.1'; //Laravel 13 support
-        
+    public function handle(): int {
+        $version = '1.3.1'; // Laravel 13 support
+
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
         $this->info('  ║                                        ║');
@@ -31,8 +29,8 @@ class VersionCommand extends Command
         $this->info('  ╚════════════════════════════════════════╝');
         $this->info('');
         $this->info("  Version: <comment>{$version}</comment>");
-        $this->info('  Laravel: <comment>' . app()->version() . '</comment>');
-        $this->info('  PHP: <comment>' . PHP_VERSION . '</comment>');
+        $this->info('  Laravel: <comment>'.app()->version().'</comment>');
+        $this->info('  PHP: <comment>'.PHP_VERSION.'</comment>');
         $this->info('');
         $this->info('  Documentation: <comment>https://github.com/hasinhayder/tyro-checkpoint</comment>');
         $this->info('  GitHub: <comment>https://github.com/hasinhayder/tyro-checkpoint</comment>');
@@ -42,8 +40,8 @@ class VersionCommand extends Command
     }
 }
 
-//1.3.1 - Laravel 13 support
-//1.3.0 - Laravel 13 support
-//1.2.0 - Security improvements and better delete UX
-//1.1.0 - Add encryption support for checkpoints
-//1.0.0 - Initial release
+// 1.3.1 - Laravel 13 support
+// 1.3.0 - Laravel 13 support
+// 1.2.0 - Security improvements and better delete UX
+// 1.1.0 - Add encryption support for checkpoints
+// 1.0.0 - Initial release

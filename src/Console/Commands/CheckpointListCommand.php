@@ -2,19 +2,18 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
-use Illuminate\Console\Command;
 use HasinHayder\TyroCheckpoint\Services\CheckpointService;
+use Illuminate\Console\Command;
 
 /**
  * CheckpointListCommand
- * 
+ *
  * Lists all available database checkpoints with their metadata.
- * 
+ *
  * Usage:
  *   php artisan tyro-checkpoint:list
  */
-class CheckpointListCommand extends Command
-{
+class CheckpointListCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -28,8 +27,7 @@ class CheckpointListCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(CheckpointService $service): int
-    {
+    public function handle(CheckpointService $service): int {
         try {
             // Get all checkpoints
             $checkpoints = $service->list();
@@ -40,6 +38,7 @@ class CheckpointListCommand extends Command
                 $this->line('');
                 $this->line('Create your first checkpoint with:');
                 $this->line('  php artisan tyro-checkpoint:create');
+
                 return self::SUCCESS;
             }
 
@@ -52,6 +51,7 @@ class CheckpointListCommand extends Command
                 if ($checkpoint->locked) {
                     $name .= ' 🔒'; // Add lock symbol for locked checkpoints
                 }
+
                 return [
                     $checkpoint->id,
                     $name,
@@ -71,6 +71,7 @@ class CheckpointListCommand extends Command
 
         } catch (\Exception $e) {
             $this->error("✗ An unexpected error occurred: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }

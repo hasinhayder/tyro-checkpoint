@@ -2,21 +2,20 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
-use Illuminate\Console\Command;
-use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
+use HasinHayder\TyroCheckpoint\Services\CheckpointService;
+use Illuminate\Console\Command;
 
 /**
  * CheckpointFlushCommand
- * 
+ *
  * Deletes all database checkpoints and their associated files.
- * 
+ *
  * Usage:
  *   php artisan tyro-checkpoint:flush
  *   php artisan tyro-checkpoint:flush --force
  */
-class CheckpointFlushCommand extends Command
-{
+class CheckpointFlushCommand extends Command {
     /**
      * The name and signature of the console command.
      */
@@ -30,21 +29,21 @@ class CheckpointFlushCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(CheckpointService $service): int
-    {
+    public function handle(CheckpointService $service): int {
         try {
             // Get all checkpoints
             $checkpoints = $service->list();
 
             if ($checkpoints->isEmpty()) {
                 $this->info('No checkpoints found.');
+
                 return self::SUCCESS;
             }
 
             // Show checkpoint list
             $this->warn('⚠ WARNING: This will delete ALL checkpoints permanently!');
             $this->line('');
-            $this->line("Checkpoints to be deleted:");
+            $this->line('Checkpoints to be deleted:');
             $this->line('');
 
             // Display checkpoints in a table
@@ -65,9 +64,10 @@ class CheckpointFlushCommand extends Command
             $this->line('');
 
             // Ask for confirmation (unless --force flag is used)
-            if (!$this->option('force')) {
-                if (!$this->confirm('Are you sure you want to delete ALL checkpoints?', false)) {
+            if (! $this->option('force')) {
+                if (! $this->confirm('Are you sure you want to delete ALL checkpoints?', false)) {
                     $this->info('Flush cancelled.');
+
                     return self::SUCCESS;
                 }
             }
@@ -82,6 +82,7 @@ class CheckpointFlushCommand extends Command
                 if ($checkpoint->locked) {
                     $this->warn("Skipping locked checkpoint: '{$checkpoint->name}' (ID: {$checkpoint->id})");
                     $skippedCount++;
+
                     continue;
                 }
 
@@ -110,10 +111,12 @@ class CheckpointFlushCommand extends Command
 
         } catch (CheckpointException $e) {
             $this->error("✗ {$e->getMessage()}");
+
             return self::FAILURE;
 
         } catch (\Exception $e) {
             $this->error("✗ An unexpected error occurred: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
