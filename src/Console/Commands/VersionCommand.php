@@ -21,7 +21,7 @@ class VersionCommand extends Command
      */
     public function handle(): int
     {
-        $version = '1.3.0'; //Laravel 13 support
+        $version = '1.3.1'; //Laravel 13 support
         
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
@@ -42,6 +42,7 @@ class VersionCommand extends Command
     }
 }
 
+//1.3.1 - Laravel 13 support
 //1.3.0 - Laravel 13 support
 //1.2.0 - Security improvements and better delete UX
 //1.1.0 - Add encryption support for checkpoints
