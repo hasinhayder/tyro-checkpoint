@@ -20,7 +20,7 @@ Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint fu
 ## Requirements
 
 - PHP 8.1 or higher
-- Laravel 10.x, 11.x or 12.x
+- Laravel 10.x, 11.x, 12.x and 13.x
 - SQLite database
 
 ## Installation
