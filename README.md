@@ -91,6 +91,12 @@ Create an **encrypted** checkpoint:
 php artisan tyro-checkpoint:create secure_snapshot --encrypt
 ```
 
+Create a checkpoint without interactive note prompts, useful for cron jobs and scripts:
+
+```bash
+php artisan tyro-checkpoint:create nightly_backup --silent
+```
+
 Example output:
 ```
 Creating checkpoint...

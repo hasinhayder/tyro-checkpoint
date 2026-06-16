@@ -106,6 +106,7 @@ class CheckpointInstallCommand extends Command {
             $this->info('');
             $this->call('tyro-checkpoint:create', [
                 'name' => 'initial_checkpoint',
+                '--silent' => true,
             ]);
         }
 
