@@ -19,7 +19,7 @@ class VersionCommand extends Command {
      * Execute the console command.
      */
     public function handle(): int {
-        $version = '1.4.0'; // Add silent checkpoint creation option
+        $version = '1.4.0'; // Add silent and auto checkpoint options
 
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
@@ -40,7 +40,7 @@ class VersionCommand extends Command {
     }
 }
 
-// 1.4.0 - Add silent checkpoint creation option
+// 1.4.0 - Add silent and auto checkpoint options
 // 1.3.1 - Laravel 13 support
 // 1.3.0 - Laravel 13 support
 // 1.2.0 - Security improvements and better delete UX

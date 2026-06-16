@@ -27,4 +27,34 @@ return [
     */
 
     'encryption_key' => env('TYRO_CHECKPOINT_ENCRYPTION_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auto Checkpoints Before Risky Commands
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, Tyro Checkpoint listens for risky Artisan commands and
+    | creates a checkpoint before the command runs. This is useful before
+    | migrations, seeders, database wipes, and other destructive local
+    | development commands.
+    |
+    */
+
+    'auto_checkpoint' => [
+        'enabled' => env('TYRO_CHECKPOINT_AUTO_ENABLED', false),
+
+        'commands' => [
+            'migrate',
+            'migrate:fresh',
+            'migrate:refresh',
+            'migrate:reset',
+            'migrate:rollback',
+            'db:seed',
+            'db:wipe',
+        ],
+
+        'name_prefix' => env('TYRO_CHECKPOINT_AUTO_NAME_PREFIX', 'auto'),
+        'encrypt' => env('TYRO_CHECKPOINT_AUTO_ENCRYPT', false),
+        'stop_on_failure' => env('TYRO_CHECKPOINT_AUTO_STOP_ON_FAILURE', true),
+    ],
 ];

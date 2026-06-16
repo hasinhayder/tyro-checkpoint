@@ -13,6 +13,9 @@ use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointRestoreCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\LockCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\UnlockCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\VersionCommand;
+use HasinHayder\TyroCheckpoint\Listeners\CreateCheckpointBeforeRiskyCommand;
+use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class TyroCheckpointServiceProvider extends ServiceProvider {
@@ -49,6 +52,8 @@ class TyroCheckpointServiceProvider extends ServiceProvider {
                 UnlockCommand::class,
                 CheckpointGenerateKeyCommand::class,
             ]);
+
+            Event::listen(CommandStarting::class, CreateCheckpointBeforeRiskyCommand::class);
         }
     }
 

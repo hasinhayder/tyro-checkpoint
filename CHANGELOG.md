@@ -7,6 +7,7 @@ All notable changes to Tyro Checkpoint will be documented in this file.
 ### Added
 
 - Add `--silent` option to `tyro-checkpoint:create` for non-interactive checkpoint creation in cron jobs and scripts.
+- Add opt-in auto-checkpoints before risky Artisan commands like migrations, seeders, and database wipes.
 
 ## [1.3.1] - 2026-03-18
 

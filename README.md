@@ -13,6 +13,7 @@ Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint fu
 -  **Lock checkpoints** to prevent accidental deletion
 -  **Add notes** to checkpoints for better organization
 -  **Encryption support** to secure your database snapshots
+-  **Auto-checkpoints** before risky Artisan commands like migrations and seeders
 -  SQLite only (perfect for local development)
 -  Simple and production-safe
 -  No configuration required
@@ -70,6 +71,38 @@ php artisan tyro-checkpoint:publish-config
 This creates `config/tyro-checkpoint.php` where you can customize the storage path.
 
 ## Usage
+
+### Auto-Checkpoints Before Risky Commands
+
+Enable auto-checkpoints to create a safety snapshot before risky Artisan commands run:
+
+```env
+TYRO_CHECKPOINT_AUTO_ENABLED=true
+```
+
+By default, Tyro Checkpoint watches these commands:
+
+```text
+migrate
+migrate:fresh
+migrate:refresh
+migrate:reset
+migrate:rollback
+db:seed
+db:wipe
+```
+
+When enabled, running a risky command creates a checkpoint automatically:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Example output:
+
+```text
+✓ Auto checkpoint created before migrate:fresh: auto_2026_06_17_153000_migrate_fresh
+```
 
 ### Create a Checkpoint
 
@@ -392,6 +425,23 @@ return [
 
     // Encryption key (automatically set via artisan tyro-checkpoint:generate-key)
     'encryption_key' => env('TYRO_CHECKPOINT_ENCRYPTION_KEY'),
+
+    // Auto checkpoints before risky Artisan commands
+    'auto_checkpoint' => [
+        'enabled' => env('TYRO_CHECKPOINT_AUTO_ENABLED', false),
+        'commands' => [
+            'migrate',
+            'migrate:fresh',
+            'migrate:refresh',
+            'migrate:reset',
+            'migrate:rollback',
+            'db:seed',
+            'db:wipe',
+        ],
+        'name_prefix' => env('TYRO_CHECKPOINT_AUTO_NAME_PREFIX', 'auto'),
+        'encrypt' => env('TYRO_CHECKPOINT_AUTO_ENCRYPT', false),
+        'stop_on_failure' => env('TYRO_CHECKPOINT_AUTO_STOP_ON_FAILURE', true),
+    ],
 ];
 ```
 
