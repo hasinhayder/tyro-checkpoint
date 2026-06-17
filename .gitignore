@@ -1,2 +1,7 @@
 *.zip
-
+.kilo
+.DS_Store
+.env
+vendor
+.phpunit.cache
+composer.lock

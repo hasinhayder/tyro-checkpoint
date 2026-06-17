@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +8,78 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Main Style -->
     <link rel="stylesheet" href="style.css">
 
     <style>
+        :root {
+            --bg: #0a0d13;
+            --bg-soft: #0e131c;
+            --surface: #11171f;
+            --surface-2: #141c27;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text: #e7edf4;
+            --text-dim: #98a3b3;
+            --text-faint: #6b7585;
+            --accent: #34d399;
+            --accent-dim: #10b981;
+            --accent-glow: rgba(52, 211, 153, 0.16);
+            --amber: #fbbf24;
+            --code-bg: #0a0e15;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+            --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            --color-bg: var(--bg);
+            --color-bg-secondary: var(--surface);
+            --color-text: var(--text);
+            --color-text-secondary: var(--text-dim);
+            --color-border: var(--border);
+            --hero-18-cyan: var(--accent);
+            --font-sans: var(--sans);
+            --font-display: var(--sans);
+            --font-mono: var(--mono);
+        }
+
+        html[data-theme="light"],
+        html[data-theme="dark"] {
+            --color-bg: var(--bg);
+            --color-bg-secondary: var(--surface);
+            --color-text: var(--text);
+            --color-text-secondary: var(--text-dim);
+            --color-border: var(--border);
+            --hero-18-cyan: var(--accent);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        ::selection {
+            background: var(--accent-glow);
+            color: #fff;
+        }
+
         /* Modern Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 10px;
@@ -25,17 +91,161 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--color-border);
-            border: 2px solid var(--color-bg);
-            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 2px solid var(--bg);
+            border-radius: 999px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--hero-18-cyan);
+            background: var(--accent);
         }
 
         html {
             scroll-behavior: smooth;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+        }
+
+        .bg-glow {
+            position: fixed;
+            z-index: -1;
+            pointer-events: none;
+            top: -260px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(circle at 50% 40%, var(--accent-glow), transparent 62%);
+            filter: blur(20px);
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            background: rgba(10, 13, 19, 0.78);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .navbar-container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 66px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .navbar-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .navbar-brand::before {
+            content: "";
+            display: block;
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            background:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2304130d' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z'/%3E%3Cpath d='M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7'/%3E%3Cpath d='M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3'/%3E%3C/svg%3E") center / 19px 19px no-repeat,
+                linear-gradient(150deg, var(--accent), var(--accent-dim));
+            box-shadow: 0 6px 20px -6px var(--accent-glow);
+            flex: 0 0 auto;
+        }
+
+        .navbar-logo {
+            font-family: var(--sans);
+            color: var(--text);
+            font-size: 1.02rem;
+            font-weight: 700;
+        }
+
+        .navbar-badge {
+            font-family: var(--mono);
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            font-size: 0.74rem;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 5px 10px;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .navbar-link {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 8px 13px;
+            border-radius: 8px;
+            transition: color .2s, background .2s;
+        }
+
+        .navbar-link:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.04);
+        }
+
+        .navbar-cta {
+            display: inline-flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 9px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            background: var(--surface-2);
+            transition: transform .15s ease, border-color .2s, background .2s;
+        }
+
+        .navbar-cta:hover {
+            transform: translateY(-1px);
+            background: #1a2330;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .mobile-menu-btn span {
+            background: var(--text);
+        }
+
+        .theme-toggle {
+            display: none;
         }
 
         /* ═══════════════════════════════════════════════════════════════
@@ -43,21 +253,24 @@
         ═══════════════════════════════════════════════════════════════ */
         .doc-layout {
             display: flex;
-            padding-top: 80px; /* Account for fixed navbar */
+            padding-top: 0;
             min-height: 100vh;
-            max-width: 1440px;
+            max-width: 1280px;
             margin: 0 auto;
+            padding-left: 24px;
+            padding-right: 24px;
         }
 
         .sidebar {
             width: 280px;
-            height: calc(100vh - 80px);
-            position: fixed;
+            height: calc(100vh - 66px);
+            position: sticky;
+            top: 66px;
             overflow-y: auto;
-            padding: 2rem 0;
-            border-right: 1px solid var(--color-border);
+            padding: 2rem 0 3rem;
+            border-right: 1px solid var(--border);
             display: none; /* Hidden on small screens */
-            background: var(--color-bg);
+            background: transparent;
             z-index: 20;
         }
 
@@ -66,14 +279,14 @@
                 display: block;
             }
             .content-wrapper {
-                margin-left: 280px;
+                margin-left: 0;
             }
         }
 
         .sidebar-item {
             display: block;
-            padding: 0.6rem 1.5rem;
-            color: var(--color-text-secondary);
+            padding: 0.55rem 1.25rem;
+            color: var(--text-dim);
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
@@ -82,14 +295,14 @@
         }
 
         .sidebar-item:hover {
-            color: var(--color-text);
-            background: var(--color-bg-secondary);
+            color: var(--text);
+            background: rgba(255,255,255,0.04);
         }
 
         .sidebar-item.active {
-            color: var(--hero-18-cyan);
-            border-left-color: var(--hero-18-cyan);
-            background: rgba(0, 210, 255, 0.05);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: var(--accent-glow);
             font-weight: 600;
         }
 
@@ -101,22 +314,23 @@
             padding: 0 1.5rem;
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--color-text-secondary);
+            letter-spacing: 0.14em;
+            color: var(--text-faint);
             margin-bottom: 0.75rem;
             font-weight: 800;
-            opacity: 0.7;
+            font-family: var(--mono);
         }
 
         .content-wrapper {
             flex: 1;
-            padding: 3rem 1.5rem 6rem;
-            max-width: 860px;
+            padding: 4.75rem 1.5rem 6rem;
+            max-width: 900px;
+            min-width: 0;
         }
 
         @media (min-width: 1024px) {
             .content-wrapper {
-                padding: 3rem 4rem 6rem;
+                padding: 4.75rem 4rem 6rem;
             }
         }
 
@@ -124,33 +338,36 @@
            CONTENT TYPOGRAPHY
         ═══════════════════════════════════════════════════════════════ */
         .content-wrapper h1 { 
-            font-family: var(--font-display);
-            font-size: clamp(2rem, 5vw, 3rem); 
-            margin-bottom: 1rem; 
-            color: var(--color-text); 
-            font-weight: 900;
-            letter-spacing: -0.04em;
+            font-family: var(--sans);
+            font-size: clamp(2.35rem, 5vw, 3.7rem);
+            margin-bottom: 1rem;
+            color: var(--text);
+            font-weight: 800;
+            letter-spacing: -0.035em;
+            line-height: 1.02;
         }
         .content-wrapper h2 { 
-            font-family: var(--font-display);
-            font-size: 1.8rem; 
-            margin: 3.5rem 0 1.25rem; 
-            color: var(--color-text); 
-            border-bottom: 1px solid var(--color-border); 
-            padding-bottom: 0.75rem; 
-            font-weight: 800;
-            letter-spacing: -0.02em;
+            font-family: var(--sans);
+            font-size: clamp(1.55rem, 3vw, 2rem);
+            margin: 4rem 0 1.25rem;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
         }
         .content-wrapper h3 { 
-            font-family: var(--font-display);
-            font-size: 1.3rem; 
-            margin: 2rem 0 1rem; 
-            color: var(--color-text); 
-            font-weight: 700;
+            font-family: var(--sans);
+            font-size: 1.08rem;
+            margin: 2rem 0 1rem;
+            color: var(--text);
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
         .content-wrapper p { 
             margin-bottom: 1.25rem; 
-            color: var(--color-text-secondary); 
+            color: var(--text-dim);
             font-size: 1.05rem;
             line-height: 1.7;
         }
@@ -158,47 +375,50 @@
         .content-wrapper ul, .content-wrapper ol { 
             margin-bottom: 1.25rem; 
             padding-left: 1.5rem; 
-            color: var(--color-text-secondary); 
+            color: var(--text-dim);
             font-size: 1.05rem;
             line-height: 1.7;
         }
         .content-wrapper li { margin-bottom: 0.5rem; }
 
-        .content-wrapper strong { color: var(--color-text); font-weight: 600; }
+        .content-wrapper strong { color: var(--text); font-weight: 600; }
 
         .content-wrapper code {
-            font-family: var(--font-mono);
-            background: var(--color-bg-secondary);
-            padding: 0.2rem 0.4rem;
+            font-family: var(--mono);
+            background: rgba(52, 211, 153, 0.08);
+            padding: 0.16rem 0.38rem;
             border-radius: 6px;
             font-size: 0.85em;
-            color: var(--hero-18-cyan);
-            border: 1px solid var(--color-border);
+            color: var(--accent);
+            border: 1px solid rgba(52, 211, 153, 0.16);
         }
 
         .content-wrapper pre {
-            background: #111827;
-            border: 1px solid #1f2937;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
             padding: 1.25rem;
-            border-radius: 12px;
+            border-radius: var(--radius-sm);
             overflow-x: auto;
             margin-bottom: 1.5rem;
+            box-shadow: 0 18px 44px -30px rgba(0,0,0,0.75);
         }
 
         .content-wrapper pre code {
             background: transparent;
             padding: 0;
-            color: #d4d4d4;
+            color: #c2cdda;
             font-size: 0.875rem;
             border: none;
+            line-height: 1.75;
         }
 
         .note {
-            background: var(--color-bg-secondary);
-            border-left: 4px solid var(--hero-18-cyan);
+            background: linear-gradient(150deg, rgba(52,211,153,0.08), rgba(20,28,39,0.52));
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
             padding: 1.25rem 1.5rem;
             margin: 2rem 0;
-            border-radius: 0 8px 8px 0;
+            border-radius: var(--radius-sm);
         }
 
         .note p {
@@ -210,7 +430,7 @@
            FOOTER
         ═══════════════════════════════════════════════════════════════ */
         footer {
-            border-top: 1px solid var(--color-border);
+            border-top: 1px solid var(--border);
             padding: 3rem 0;
             margin-top: 4rem;
         }
@@ -219,23 +439,64 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: var(--color-text-secondary);
+            color: var(--text-faint);
             font-size: 0.875rem;
+        }
+
+        @media (max-width: 900px) {
+            .navbar-links {
+                display: none;
+            }
+
+            .navbar-links.open {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                position: absolute;
+                top: 66px;
+                left: 0;
+                right: 0;
+                background: var(--bg-soft);
+                border-bottom: 1px solid var(--border);
+                padding: 10px 16px 16px;
+            }
+
+            .navbar-links.open a {
+                padding: 12px 10px;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .doc-layout {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .content-wrapper {
+                padding-left: 0;
+                padding-right: 0;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
     <nav class="navbar">
         <div class="navbar-container">
             <a href="index.html" class="navbar-brand">
                 <span class="navbar-logo">Tyro Checkpoint</span>
-                <span class="navbar-badge">v1.2</span>
+                <span class="navbar-badge">v1.7.0</span>
             </a>
             <div class="navbar-links" id="navbarLinks">
-                <a href="#use-cases" class="navbar-link">Use Cases</a>
-                <a href="index.html#features" class="navbar-link">Features</a>
-                <a href="index.html#snapshots" class="navbar-link">Snapshots</a>
-                <a href="index.html#installation" class="navbar-link">Installation</a>
+                <a href="#introduction" class="navbar-link">Docs</a>
+                <a href="#installation" class="navbar-link">Installation</a>
+                <a href="#create" class="navbar-link">Usage</a>
+                <a href="#configuration" class="navbar-link">Config</a>
                 <a href="index.html" class="navbar-link">Home</a>
                 <a href="https://github.com/hasinhayder/tyro-checkpoint" class="navbar-cta" target="_blank">View on GitHub</a>
             </div>
@@ -280,15 +541,17 @@
             <div class="sidebar-group">
                 <div class="sidebar-title">Usage</div>
                 <a href="#create" class="sidebar-item">Create Checkpoint</a>
+                <a href="#auto-checkpoints" class="sidebar-item">Auto-Checkpoints</a>
                 <a href="#list" class="sidebar-item">List Checkpoints</a>
                 <a href="#restore" class="sidebar-item">Restore Checkpoint</a>
-                <a href="#notes-locks" class="sidebar-item">Notes & Locks</a>
+                <a href="#notes-locks-flags" class="sidebar-item">Notes, Locks & Flags</a>
                 <a href="#delete" class="sidebar-item">Delete & Flush</a>
             </div>
             <div class="sidebar-group">
                 <div class="sidebar-title">Advanced</div>
                 <a href="#why-encryption" class="sidebar-item">Why Encryption Matters?</a>
                 <a href="#encryption" class="sidebar-item">Encryption Guide</a>
+                <a href="#database-engines" class="sidebar-item">Database Engines</a>
                 <a href="#configuration" class="sidebar-item">Configuration</a>
             </div>
         </aside>
@@ -297,9 +560,9 @@
         <main class="content-wrapper">
             <section id="introduction">
                 <h1>Documentation</h1>
-                <p>Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint functionality for your SQLite database during local development.</p>
+                <p>Tyro Checkpoint is a Laravel package that provides Git-like checkpoint functionality for your local development database. Create a snapshot before risky work, then restore that exact state when you need it.</p>
                 <div class="note">
-                    <p><strong>SQLite only:</strong> This package is specifically designed for SQLite databases and is perfect for lightning-fast local development flows.</p>
+                    <p><strong>Current version:</strong> v1.7.0 supports SQLite, MySQL, and PostgreSQL, with optional encryption, locks, flags, auto-checkpoints, and in-place encryption for existing snapshots.</p>
                 </div>
             </section>
 
@@ -307,8 +570,10 @@
                 <h2>Requirements</h2>
                 <ul>
                     <li>PHP 8.1 or higher</li>
-                    <li>Laravel 10.x, 11.x or 12.x</li>
-                    <li>SQLite database configured as your default connection</li>
+                    <li>Laravel 10.x, 11.x, 12.x, or 13.x</li>
+                    <li>SQLite, MySQL 8+, or PostgreSQL 12+</li>
+                    <li>For MySQL: <code>mysqldump</code> and <code>mysql</code> CLI tools</li>
+                    <li>For PostgreSQL: <code>pg_dump</code> and <code>psql</code> CLI tools</li>
                 </ul>
             </section>
 
@@ -320,31 +585,31 @@
                 <p>Run the installation command to setup everything:</p>
                 <pre><code>php artisan tyro-checkpoint:install</code></pre>
                 
-                <p>This command verifies your database setup and creates the <code>storage/tyro-checkpoints</code> directory.</p>
+                <p>This command verifies your database setup, checks required database binaries when needed, creates the checkpoint storage directory, and prepares the metadata registry.</p>
             </section>
 
             <section id="how-it-works">
                 <h2>How It Works</h2>
                 <ol>
-                    <li><strong>Full Snapshots:</strong> Each checkpoint is a complete copy of your SQLite database file.</li>
+                    <li><strong>Full Snapshots:</strong> Each checkpoint captures your full database state. SQLite uses file snapshots; MySQL and PostgreSQL use SQL dumps.</li>
                     <li><strong>Metadata Tracking:</strong> Metadata is stored in a JSON file outside the database to prevent data loss during restoration.</li>
-                    <li><strong>Instant Swap:</strong> Restoring a checkpoint simply replaces your current database file with the saved snapshot.</li>
-                    <li><strong>Encryption:</strong> Optional file-level encryption using AES-256-CBC.</li>
+                    <li><strong>Safe Restore:</strong> Restoring replaces the current database state and guards against restoring into the wrong database unless you explicitly force it.</li>
+                    <li><strong>Encryption:</strong> Optional file-level encryption for new or existing checkpoints.</li>
                 </ol>
             </section>
 
             <section id="checkpoints">
                 <h2>What are Checkpoints?</h2>
-                <p>A checkpoint is a point-in-time snapshot of your entire SQLite database. Unlike traditional migrations or SQL dumps, a checkpoint captures the exact state of your data and schema at a specific moment.</p>
+                <p>A checkpoint is a point-in-time snapshot of your entire local database. Unlike traditional migrations alone, a checkpoint captures the exact state of your data and schema at a specific moment.</p>
                 
                 <h3>Anatomy of a Checkpoint</h3>
                 <ul>
-                    <li><strong>Database Snapshot:</strong> A physical copy of your <code>database.sqlite</code> file, optionally encrypted.</li>
-                    <li><strong>Metadata:</strong> A JSON record containing the checkpoint name, ID, creation timestamp, optional notes, and encryption status.</li>
+                    <li><strong>Database Snapshot:</strong> A SQLite file copy or SQL dump for MySQL/PostgreSQL, optionally encrypted.</li>
+                    <li><strong>Metadata:</strong> A JSON record containing the checkpoint name, ID, creation timestamp, driver, database identity, optional notes, lock/flag state, and encryption status.</li>
                 </ul>
 
                 <h3>Storage</h3>
-                <p>By default, all checkpoints are stored in <code>storage/tyro-checkpoints/</code>. This directory contains both the snapshot files (<code>.sqlite</code>) and the metadata registry (<code>checkpoints.json</code>).</p>
+                <p>By default, all checkpoints are stored in <code>storage/tyro-checkpoints/</code>. This directory contains snapshot files or dumps plus the metadata registry at <code>checkpoints.json</code>.</p>
                 
                 <div class="note">
                     <p><strong>Pro Tip:</strong> You can version control certain checkpoints or exclude the entire directory from your Git repository depending on your team's workflow.</p>
@@ -362,12 +627,34 @@
                 <h3>Encrypted Checkpoints</h3>
                 <p>To create an encrypted snapshot, use the <code>--encrypt</code> flag:</p>
                 <pre><code>php artisan tyro-checkpoint:create secure_state --encrypt</code></pre>
+
+                <h3>Script-Friendly Checkpoints</h3>
+                <p>Use <code>--silent</code> to skip interactive note prompts in cron jobs, CI helpers, or local scripts:</p>
+                <pre><code>php artisan tyro-checkpoint:create nightly_backup --silent</code></pre>
+            </section>
+
+            <section id="auto-checkpoints">
+                <h2>Auto-Checkpoints</h2>
+                <p>Auto-checkpoints create a safety snapshot before risky Artisan commands such as migrations, seeders, and database wipes.</p>
+                <pre><code>TYRO_CHECKPOINT_AUTO_ENABLED=true</code></pre>
+                <p>By default, Tyro Checkpoint watches these commands:</p>
+                <pre><code>migrate
+migrate:fresh
+migrate:refresh
+migrate:reset
+migrate:rollback
+db:seed
+db:wipe</code></pre>
+                <p>You can customize the watched commands, checkpoint name prefix, encryption behavior, and failure behavior in <code>config/tyro-checkpoint.php</code>.</p>
             </section>
 
             <section id="list">
                 <h2>Listing Checkpoints</h2>
                 <p>View all saved checkpoints, their sizes, creation dates, and statuses:</p>
                 <pre><code>php artisan tyro-checkpoint:list</code></pre>
+                <p>Inspect a single checkpoint by ID or name:</p>
+                <pre><code>php artisan tyro-checkpoint:details 1
+php artisan tyro-checkpoint:list initial_state</code></pre>
             </section>
 
             <section id="restore">
@@ -376,14 +663,14 @@
                 <pre><code>php artisan tyro-checkpoint:restore 1
 php artisan tyro-checkpoint:restore initial_state</code></pre>
                 
-                <p>If you don't provide an identifier, the command will display a selection list.</p>
+                <p>If you don't provide an identifier, the command will display a selection list. Encrypted checkpoints are decrypted automatically during restore.</p>
                 <div class="note">
-                    <p><strong>Note:</strong> Typical restoration takes less than 2 seconds, compared to minutes for migrating and seeding.</p>
+                    <p><strong>Safety:</strong> Restore tracks the checkpoint driver and database identity. Use <code>--force</code> only when you intentionally want to bypass the database mismatch guard.</p>
                 </div>
             </section>
 
-            <section id="notes-locks">
-                <h2>Notes & Locks</h2>
+            <section id="notes-locks-flags">
+                <h2>Notes, Locks & Flags</h2>
                 <h3>Adding Notes</h3>
                 <p>Change or add a note to an existing checkpoint:</p>
                 <pre><code>php artisan tyro-checkpoint:add-note 1</code></pre>
@@ -394,6 +681,11 @@ php artisan tyro-checkpoint:restore initial_state</code></pre>
                 
                 <p>To enable deletion again, unlock it:</p>
                 <pre><code>php artisan tyro-checkpoint:unlock 1</code></pre>
+
+                <h3>Flagging Checkpoints</h3>
+                <p>Flag important checkpoints for attention without preventing restore or deletion:</p>
+                <pre><code>php artisan tyro-checkpoint:flag 1
+php artisan tyro-checkpoint:unflag 1</code></pre>
             </section>
 
             <section id="delete">
@@ -411,14 +703,14 @@ php artisan tyro-checkpoint:restore initial_state</code></pre>
                 
                 <h3>Key Benefits</h3>
                 <ul>
-                    <li><strong>Data Privacy:</strong> Protects sensitive user data (emails, passwords, personal details) within your SQLite snapshots.</li>
+                    <li><strong>Data Privacy:</strong> Protects sensitive user data (emails, passwords, personal details) within your local database snapshots.</li>
                     <li><strong>Compliance:</strong> Helps meet security standards and internal policies regarding data handling during development.</li>
                     <li><strong>Safe Sharing:</strong> Encrypted snapshots can be shared with teammates more securely when the encryption key is managed properly.</li>
                     <li><strong>Zero Overhead:</strong> AES-256 encryption is blazingly fast on modern hardware, adding negligible time to the snapshot process.</li>
                 </ul>
 
                 <div class="note" style="border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.1);">
-                    <p><strong>Note:</strong> Encryption is handled at the file level. Once a snapshot is encrypted, it cannot be opened by standard SQLite browsers without first being decrypted by Tyro Checkpoint during restoration.</p>
+                    <p><strong>Note:</strong> Encryption is handled at the file level. Once a snapshot is encrypted, it cannot be opened directly without first being decrypted by Tyro Checkpoint during restoration.</p>
                 </div>
             </section>
 
@@ -430,13 +722,38 @@ php artisan tyro-checkpoint:restore initial_state</code></pre>
                     <p><strong style="color: #ef4444;">⚠ WARNING:</strong> Replacing an existing encryption key will make all previously encrypted checkpoints <strong>impossible to restore</strong>. Always backup your key if you plan to keep your snapshots.</p>
                 </div>
                 <p>This adds <code>TYRO_CHECKPOINT_ENCRYPTION_KEY</code> to your <code>.env</code> file. Once configured, use <code>--encrypt</code> when creating checkpoints. Restoration will automatically detect and decrypt them.</p>
+
+                <h3>Encrypt an Existing Checkpoint</h3>
+                <p>Version 1.7.0 adds in-place encryption for checkpoints you already created:</p>
+                <pre><code>php artisan tyro-checkpoint:encrypt 1
+php artisan tyro-checkpoint:encrypt initial_state</code></pre>
+                <p>The command removes the original unencrypted snapshot after encryption, updates the same checkpoint metadata record, and will not double-encrypt an already encrypted checkpoint.</p>
+            </section>
+
+            <section id="database-engines">
+                <h2>Database Engines</h2>
+                <p>Tyro Checkpoint supports three local development database engines:</p>
+                <ul>
+                    <li><strong>SQLite:</strong> snapshots are based on database file copies.</li>
+                    <li><strong>MySQL:</strong> snapshots and restores use <code>mysqldump</code> and <code>mysql</code>.</li>
+                    <li><strong>PostgreSQL:</strong> snapshots and restores use <code>pg_dump</code> and <code>psql</code>.</li>
+                </ul>
+                <p>By default, Tyro Checkpoint uses your Laravel default database connection. Set <code>TYRO_CHECKPOINT_CONNECTION</code> to checkpoint a different configured connection.</p>
             </section>
 
             <section id="configuration">
                 <h2>Configuration</h2>
-                <p>Publish the configuration to customize the storage path:</p>
+                <p>Publish the configuration to customize storage, connections, binaries, process timeout, and auto-checkpoint behavior:</p>
                 <pre><code>php artisan tyro-checkpoint:publish-config</code></pre>
-                <p>Edit <code>config/tyro-checkpoint.php</code> to change where snapshots are stored.</p>
+                <p>Common environment variables:</p>
+                <pre><code>TYRO_CHECKPOINT_STORAGE_PATH=/custom/path
+TYRO_CHECKPOINT_CONNECTION=mysql
+TYRO_CHECKPOINT_ENCRYPTION_KEY=base64:...
+TYRO_CHECKPOINT_PROCESS_TIMEOUT=600
+TYRO_CHECKPOINT_AUTO_ENABLED=true
+TYRO_CHECKPOINT_AUTO_ENCRYPT=false
+TYRO_CHECKPOINT_AUTO_STOP_ON_FAILURE=true</code></pre>
+                <p>For MySQL and PostgreSQL, you can also override binary paths such as <code>TYRO_CHECKPOINT_MYSQLDUMP_BIN</code>, <code>TYRO_CHECKPOINT_MYSQL_BIN</code>, <code>TYRO_CHECKPOINT_PG_DUMP_BIN</code>, and <code>TYRO_CHECKPOINT_PSQL_BIN</code>.</p>
             </section>
 
             <footer>
