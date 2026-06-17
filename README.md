@@ -1,8 +1,8 @@
 # Tyro Checkpoint
 
-**Database checkpoints for Laravel local development (SQLite only)**
+**Database checkpoints for Laravel local development**
 
-Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint functionality for your SQLite database during local development. Create snapshots of your database state and restore them instantly when needed.
+Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint functionality for your database during local development. Supports SQLite, MySQL, and PostgreSQL. Create snapshots of your database state and restore them instantly when needed.
 
 ## Features
 
@@ -14,7 +14,7 @@ Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint fu
 -  **Add notes** to checkpoints for better organization
 -  **Encryption support** to secure your database snapshots
 -  **Auto-checkpoints** before risky Artisan commands like migrations and seeders
--  SQLite only (perfect for local development)
+-  Supports SQLite, MySQL, and PostgreSQL
 -  Simple and production-safe
 -  No configuration required
 
@@ -22,7 +22,9 @@ Tyro Checkpoint is a simple Laravel package that provides Git-like checkpoint fu
 
 - PHP 8.1 or higher
 - Laravel 10.x, 11.x, 12.x and 13.x
-- SQLite database
+- SQLite, MySQL 8+, or PostgreSQL 12+
+- **MySQL:** `mysqldump` and `mysql` CLI tools (install `mysql-client`)
+- **PostgreSQL:** `pg_dump` and `psql` CLI tools (install `postgresql-client`)
 
 ## Installation
 
@@ -41,7 +43,8 @@ php artisan tyro-checkpoint:install
 ```
 
 This will:
-- Check your SQLite database configuration
+- Check your database configuration
+- Validate required CLI binaries for MySQL/PostgreSQL
 - Create the checkpoint storage directory
 - Create the checkpoints metadata file (checkpoints.json)
 - Optionally create an initial checkpoint
@@ -329,10 +332,10 @@ php artisan tyro-checkpoint:flush --force
 
 ## How It Works
 
-1. **Checkpoints are full snapshots**: Each checkpoint is a complete copy of your SQLite database file (no diffs or incrementals)
+1. **Checkpoints are full snapshots**: Each checkpoint is a complete copy of your database (SQLite: direct file copy; MySQL/PostgreSQL: SQL dump)
 2. **Stored locally**: Checkpoint files are stored in `storage/tyro-checkpoints/`
-3. **Metadata tracking**: Checkpoint metadata (ID, name, path, size, created_at, locked, note) is stored in `storage/tyro-checkpoints/checkpoints.json` - **outside the database** to prevent loss when restoring
-4. **Restore process**: Restoring a checkpoint replaces your current database file with the selected checkpoint file
+3. **Metadata tracking**: Checkpoint metadata (ID, name, path, size, created_at, locked, note, driver) is stored in `storage/tyro-checkpoints/checkpoints.json` - **outside the database** to prevent loss when restoring
+4. **Restore process**: Restoring a checkpoint replaces your current database with the selected checkpoint (drop & import for MySQL/PostgreSQL; file replacement for SQLite)
 5. **Persistent checkpoints**: Checkpoints are NOT automatically deleted after restoration. You can restore the same checkpoint multiple times and must manually delete checkpoints when no longer needed.
 6. **Safe restoration**: Because metadata is stored outside the database, you never lose track of any checkpoint, even when restoring to an earlier state
 7. **Lock protection**: Locked checkpoints are protected from deletion to preserve important baseline states
@@ -485,10 +488,10 @@ return [
 
 ## Important Notes
 
-- **SQLite only**: This package only supports SQLite databases. It will throw an error if you try to use it with MySQL, PostgreSQL, or other database drivers.
 - **Local development only**: This package should only be used in local development environments. Install it as a dev dependency with `--dev`.
 - **Not for production**: Never use this package in production environments.
 - **In-memory databases not supported**: SQLite `:memory:` databases cannot be checkpointed.
+- **CLI binaries required**: MySQL and PostgreSQL drivers require native CLI tools (`mysqldump`/`mysql`, `pg_dump`/`psql`).
 - **Metadata stored outside database**: Checkpoint metadata is stored in a JSON file, not in the database itself. This ensures you never lose track of checkpoints when restoring.
 - **Checkpoints persist after restore**: Checkpoints are NOT automatically deleted when restored. This allows you to restore the same checkpoint multiple times to test different approaches.
 - **Manual cleanup required**: Use `php artisan tyro-checkpoint:delete` or `php artisan tyro-checkpoint:flush` to remove checkpoints you no longer need.
@@ -500,7 +503,8 @@ return [
 
 The package includes comprehensive error handling:
 
-- **Non-SQLite database**: Error if your database driver is not SQLite
+- **Unsupported database driver**: Error if your database driver is not SQLite, MySQL, or PostgreSQL
+- **Missing CLI binary**: Error if MySQL/PostgreSQL CLI tools are not installed
 - **In-memory database**: Error if using `:memory:` SQLite database
 - **Missing database file**: Error if the database file doesn't exist
 - **Duplicate name**: Error if creating a checkpoint with an existing name

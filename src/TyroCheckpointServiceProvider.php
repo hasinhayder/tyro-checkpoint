@@ -16,7 +16,10 @@ use HasinHayder\TyroCheckpoint\Console\Commands\LockCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\UnflagCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\UnlockCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\VersionCommand;
+use HasinHayder\TyroCheckpoint\Drivers\DriverManager;
 use HasinHayder\TyroCheckpoint\Listeners\CreateCheckpointBeforeRiskyCommand;
+use HasinHayder\TyroCheckpoint\Process\ProcessRunner;
+use HasinHayder\TyroCheckpoint\Process\SymfonyProcessRunner;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -67,9 +70,16 @@ class TyroCheckpointServiceProvider extends ServiceProvider {
      * Register any application services.
      */
     public function register(): void {
-        // Register the checkpoint service as a singleton
+        $this->app->singleton(ProcessRunner::class, fn () => new SymfonyProcessRunner);
+
+        $this->app->singleton(DriverManager::class, fn ($app) => new DriverManager(
+            $app->make(ProcessRunner::class)
+        ));
+
         $this->app->singleton(Services\CheckpointService::class, function ($app) {
-            return new Services\CheckpointService;
+            return new Services\CheckpointService(
+                $app->make(DriverManager::class)
+            );
         });
     }
 }

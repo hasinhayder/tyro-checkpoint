@@ -17,6 +17,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tyro Checkpoint Target Connection
+    |--------------------------------------------------------------------------
+    |
+    | Override which database connection to checkpoint. By default,
+    | Tyro Checkpoint uses config('database.default'). Set this to
+    | checkpoint a different connection (e.g. a named MySQL connection
+    | while your default remains SQLite).
+    |
+    */
+
+    'connection' => env('TYRO_CHECKPOINT_CONNECTION'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Tyro Checkpoint Encryption Key
     |--------------------------------------------------------------------------
     |
@@ -27,6 +41,49 @@ return [
     */
 
     'encryption_key' => env('TYRO_CHECKPOINT_ENCRYPTION_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Binary Paths
+    |--------------------------------------------------------------------------
+    |
+    | Custom paths to the CLI tools used by MySQL and PostgreSQL drivers.
+    | Leave as default unless your binaries are installed in a non-standard
+    | location.
+    |
+    */
+
+    'binaries' => [
+        'mysql' => env('TYRO_CHECKPOINT_MYSQL_BIN', 'mysql'),
+        'mysqldump' => env('TYRO_CHECKPOINT_MYSQLDUMP_BIN', 'mysqldump'),
+        'psql' => env('TYRO_CHECKPOINT_PSQL_BIN', 'psql'),
+        'pg_dump' => env('TYRO_CHECKPOINT_PG_DUMP_BIN', 'pg_dump'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | MySQL Driver Options
+    |--------------------------------------------------------------------------
+    */
+
+    'mysql' => [
+        'gtid_purged' => env('TYRO_CHECKPOINT_MYSQL_GTID_PURGED', 'OFF'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | PostgreSQL Driver Options
+    |--------------------------------------------------------------------------
+    |
+    | single_transaction: wrap the entire restore in a transaction.
+    |   May not be supported by all psql builds or for very large dumps.
+    |   Disabled by default.
+    |
+    */
+
+    'postgres' => [
+        'single_transaction' => env('TYRO_CHECKPOINT_POSTGRES_SINGLE_TRANSACTION', false),
+    ],
 
     /*
     |--------------------------------------------------------------------------

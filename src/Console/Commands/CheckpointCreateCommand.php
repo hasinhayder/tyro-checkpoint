@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 /**
  * CheckpointCreateCommand
  *
- * Creates a new database checkpoint by copying the current SQLite database file.
+ * Creates a new database checkpoint by taking a snapshot of the current database.
  *
  * Usage:
  *   php artisan tyro-checkpoint:create

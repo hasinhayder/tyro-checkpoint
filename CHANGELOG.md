@@ -2,6 +2,25 @@
 
 All notable changes to Tyro Checkpoint will be documented in this file.
 
+## [1.6.0] - 2026-06-17
+
+### Added
+
+- Add MySQL and PostgreSQL support via driver abstraction.
+- Add `DriverManager` with `SqliteCheckpointDriver`, `MysqlCheckpointDriver`, and `PostgresCheckpointDriver`.
+- Add `ProcessRunner` abstraction (default: `SymfonyProcessRunner`) for testability and credential safety.
+- Add `connection` and `binaries` configuration options.
+- Add `driver` field to checkpoint metadata for forward compatibility.
+- Add `tyro-checkpoint:details` now shows the checkpoint driver.
+- `tyro-checkpoint:install` supports MySQL and PostgreSQL connections with binary validation.
+
+### Changed
+
+- `CheckpointService` delegates snapshot creation and restoration to the resolved driver.
+- `getDatabasePath()` is now deprecated and SQLite-only.
+- `composer.json` description no longer states "SQLite only".
+- Add explicit `symfony/process` dependency.
+
 ## [1.5.0] - 2026-06-17
 
 ### Added

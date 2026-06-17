@@ -59,6 +59,7 @@ class CheckpointDetailsCommand extends Command {
             $this->line('');
             $this->line("  ID:        {$checkpoint->id}");
             $this->line("  Name:      {$checkpoint->name}");
+            $this->line('  Driver:    '.$checkpoint->driver);
             $this->line("  Size:      {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created:   {$checkpoint->created_at->format('Y-m-d H:i:s')}");
             $this->line('  Locked:    '.($checkpoint->locked ? 'Yes' : 'No'));
@@ -122,5 +123,4 @@ class CheckpointDetailsCommand extends Command {
 
         return (int) $input;
     }
-
 }

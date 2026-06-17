@@ -8,7 +8,7 @@ use Carbon\Carbon;
  * Checkpoint Model
  *
  * Represents a database checkpoint with its metadata.
- * Each checkpoint is a full snapshot of the SQLite database file.
+ * Each checkpoint is a full snapshot of the database.
  *
  * This is a simple data object (not an Eloquent model) since checkpoint
  * metadata is stored in a JSON file outside the database to prevent loss
@@ -23,6 +23,7 @@ use Carbon\Carbon;
  * @property bool $flagged
  * @property string|null $note
  * @property bool $encrypted
+ * @property string $driver
  */
 class Checkpoint {
     /**
@@ -71,6 +72,11 @@ class Checkpoint {
     public bool $encrypted;
 
     /**
+     * Database driver used to create this checkpoint ('sqlite', 'mysql', 'pgsql')
+     */
+    public string $driver;
+
+    /**
      * Create a new Checkpoint instance from array data.
      */
     public function __construct(array $data) {
@@ -85,6 +91,7 @@ class Checkpoint {
         $this->flagged = $data['flagged'] ?? false;
         $this->note = $data['note'] ?? null;
         $this->encrypted = $data['encrypted'] ?? false;
+        $this->driver = $data['driver'] ?? 'sqlite';
     }
 
     /**
@@ -101,6 +108,7 @@ class Checkpoint {
             'flagged' => $this->flagged,
             'note' => $this->note,
             'encrypted' => $this->encrypted,
+            'driver' => $this->driver,
         ];
     }
 

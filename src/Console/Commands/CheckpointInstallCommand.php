@@ -2,32 +2,18 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
+use HasinHayder\TyroCheckpoint\Drivers\DriverManager;
+use HasinHayder\TyroCheckpoint\Exceptions\BinaryNotFoundException;
+use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-/**
- * CheckpointInstallCommand
- *
- * Handles the installation and setup of Tyro Checkpoint package.
- *
- * Usage:
- *   php artisan tyro-checkpoint:install
- */
 class CheckpointInstallCommand extends Command {
-    /**
-     * The name and signature of the console command.
-     */
     protected $signature = 'tyro-checkpoint:install';
 
-    /**
-     * The console command description.
-     */
     protected $description = 'Install Tyro Checkpoint package and setup database';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle(): int {
+    public function handle(DriverManager $driverManager): int {
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
         $this->info('  ║                                        ║');
@@ -36,50 +22,30 @@ class CheckpointInstallCommand extends Command {
         $this->info('  ╚════════════════════════════════════════╝');
         $this->info('');
 
-        // Check if using SQLite
         $this->info('Checking database configuration...');
 
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
+        $connection = $driverManager->connectionName();
+        $driverName = config("database.connections.{$connection}.driver");
 
-        if ($driver !== 'sqlite') {
-            $this->error('   ✗ Current database driver is not SQLite: '.$driver);
-            $this->error('   Tyro Checkpoint only supports SQLite databases.');
-            $this->error('   Please configure SQLite in your .env file:');
-            $this->line('');
-            $this->line('   DB_CONNECTION=sqlite');
-            $this->line('   DB_DATABASE='.database_path('database.sqlite'));
-            $this->line('');
+        if (! in_array($driverName, ['sqlite', 'mysql', 'pgsql'], true)) {
+            $this->error("   ✗ Unsupported database driver: {$driverName}");
+            $this->error('   Tyro Checkpoint supports SQLite, MySQL, and PostgreSQL.');
 
             return self::FAILURE;
         }
 
-        $databasePath = config("database.connections.{$connection}.database");
-
-        if ($databasePath === ':memory:') {
-            $this->error('   ✗ In-memory SQLite databases are not supported');
-            $this->error('   Please configure a file-based SQLite database.');
-
-            return self::FAILURE;
-        }
-
-        if (! File::exists($databasePath)) {
-            $this->warn('   ⚠ Database file does not exist: '.$databasePath);
-            if ($this->confirm('Would you like to create it now?', true)) {
-                File::put($databasePath, '');
-                $this->info('   ✓ Database file created');
-            } else {
-                $this->error('   Installation cancelled.');
-
+        if ($driverName === 'sqlite') {
+            if (! $this->setupSqlite($connection)) {
                 return self::FAILURE;
             }
         } else {
-            $this->info('   ✓ SQLite database configured correctly');
+            if (! $this->setupServerDb($connection, $driverManager)) {
+                return self::FAILURE;
+            }
         }
 
         $this->info('');
 
-        // Create checkpoint storage directory
         $this->info('Setting up checkpoint storage...');
         $checkpointPath = storage_path('tyro-checkpoints');
 
@@ -90,8 +56,8 @@ class CheckpointInstallCommand extends Command {
             $this->info('   ✓ Checkpoint storage directory already exists');
         }
 
-        // Create checkpoints.json if it doesn't exist
         $checkpointsFile = $checkpointPath.'/checkpoints.json';
+
         if (! File::exists($checkpointsFile)) {
             File::put($checkpointsFile, '[]');
             $this->info('   ✓ Created checkpoints metadata file: checkpoints.json');
@@ -101,7 +67,6 @@ class CheckpointInstallCommand extends Command {
 
         $this->info('');
 
-        // Offer to create initial checkpoint
         if ($this->confirm('Would you like to create an initial checkpoint now?', true)) {
             $this->info('');
             $this->call('tyro-checkpoint:create', [
@@ -153,5 +118,56 @@ class CheckpointInstallCommand extends Command {
         $this->info('');
 
         return self::SUCCESS;
+    }
+
+    private function setupSqlite(string $connection): bool {
+        $databasePath = config("database.connections.{$connection}.database");
+
+        if ($databasePath === ':memory:') {
+            $this->error('   ✗ In-memory SQLite databases are not supported');
+            $this->error('   Please configure a file-based SQLite database.');
+
+            return false;
+        }
+
+        if (! File::exists($databasePath)) {
+            $this->warn('   ⚠ Database file does not exist: '.$databasePath);
+
+            if ($this->confirm('Would you like to create it now?', true)) {
+                File::put($databasePath, '');
+                $this->info('   ✓ Database file created');
+            } else {
+                $this->error('   Installation cancelled.');
+
+                return false;
+            }
+        } else {
+            $this->info('   ✓ SQLite database configured correctly');
+        }
+
+        return true;
+    }
+
+    private function setupServerDb(string $connection, DriverManager $driverManager): bool {
+        try {
+            $driver = $driverManager->driverForName(
+                config("database.connections.{$connection}.driver"),
+                $connection,
+            );
+            $driver->assertReady();
+        } catch (BinaryNotFoundException $e) {
+            $this->error("   ✗ {$e->getMessage()}");
+
+            return false;
+        } catch (CheckpointException $e) {
+            $this->error("   ✗ {$e->getMessage()}");
+
+            return false;
+        }
+
+        $driverName = ucfirst(config("database.connections.{$connection}.driver"));
+        $this->info("   ✓ {$driverName} database configured correctly");
+
+        return true;
     }
 }

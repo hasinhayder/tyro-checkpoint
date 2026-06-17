@@ -2,23 +2,28 @@
 
 namespace HasinHayder\TyroCheckpoint\Services;
 
+use HasinHayder\TyroCheckpoint\Drivers\DriverManager;
+use HasinHayder\TyroCheckpoint\Drivers\SqliteCheckpointDriver;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 use HasinHayder\TyroCheckpoint\Models\Checkpoint;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 /**
  * CheckpointService
  *
  * Handles all checkpoint operations: create, list, restore, and delete.
- * Works exclusively with SQLite databases for local development.
+ * Supports SQLite, MySQL, and PostgreSQL via driver abstraction.
  *
  * Checkpoint metadata is stored in a JSON file outside the database
  * to prevent loss of checkpoint history when restoring.
  */
 class CheckpointService {
+    public function __construct(
+        private readonly DriverManager $driverManager,
+    ) {}
+
     /**
      * Maximum allowed length for checkpoint names.
      */
@@ -283,34 +288,23 @@ class CheckpointService {
     /**
      * Get the current SQLite database file path.
      *
+     * @deprecated 1.6.0 Use the driver directly instead. This method is SQLite-only
+     *             and will throw a CheckpointException for non-SQLite connections.
+     *
      * @throws CheckpointException
      */
     public function getDatabasePath(): string {
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
+        $driver = $this->driverManager->driver();
 
-        // Only SQLite is supported
-        if ($driver !== 'sqlite') {
+        if ($driver->name() !== 'sqlite') {
             throw new CheckpointException(
-                "Tyro Checkpoint only supports SQLite databases. Current driver: {$driver}"
+                'getDatabasePath() is only available for SQLite connections.'
             );
         }
 
-        $databasePath = config("database.connections.{$connection}.database");
-
-        if (! $databasePath || $databasePath === ':memory:') {
-            throw new CheckpointException(
-                'In-memory SQLite databases are not supported for checkpoints.'
-            );
-        }
-
-        if (! File::exists($databasePath)) {
-            throw new CheckpointException(
-                "Database file not found: {$databasePath}"
-            );
-        }
-
-        return $databasePath;
+        return (new SqliteCheckpointDriver(
+            $this->driverManager->connectionName()
+        ))->getDatabasePath();
     }
 
     /**
@@ -324,6 +318,8 @@ class CheckpointService {
      */
     public function create(?string $name = null, ?string $note = null, bool $encrypt = false): Checkpoint {
         $this->ensureStorageDirectoryExists();
+
+        $driver = $this->driverManager->driver();
 
         // Check if encryption is requested
         if ($encrypt) {
@@ -358,26 +354,37 @@ class CheckpointService {
             }
         }
 
-        // Get the source database file path
-        $sourcePath = $this->getDatabasePath();
-
-        // Create checkpoint file path
-        $checkpointPath = $this->getCheckpointStoragePath().'/'.$name.'.sqlite';
+        // Create checkpoint file path (extension from driver)
+        $extension = $driver->fileExtension();
+        $checkpointPath = $this->getCheckpointStoragePath().'/'.$name.$extension;
 
         // Validate the checkpoint path is within storage (defense in depth)
         $this->validateCheckpointPath($checkpointPath);
 
-        // Copy/Encrypt the database file to create the checkpoint
-        if ($encrypt) {
-            if (! $this->encryptFile($sourcePath, $checkpointPath)) {
-                throw new CheckpointException(
-                    "Failed to create encrypted checkpoint file: {$checkpointPath}"
-                );
+        // Write raw snapshot via driver to a temp file under sys_get_temp_dir
+        $tempDir = sys_get_temp_dir();
+        $tempPath = $tempDir.'/tyro_checkpoint_'.uniqid().$extension;
+
+        try {
+            $driver->createSnapshot($tempPath);
+
+            if ($encrypt) {
+                if (! $this->encryptFile($tempPath, $checkpointPath)) {
+                    throw new CheckpointException(
+                        "Failed to create encrypted checkpoint file: {$checkpointPath}"
+                    );
+                }
+            } else {
+                if (! rename($tempPath, $checkpointPath)) {
+                    throw new CheckpointException(
+                        "Failed to move checkpoint file to: {$checkpointPath}"
+                    );
+                }
             }
-        } elseif (! File::copy($sourcePath, $checkpointPath)) {
-            throw new CheckpointException(
-                "Failed to create checkpoint file: {$checkpointPath}"
-            );
+        } finally {
+            if (File::exists($tempPath)) {
+                @unlink($tempPath);
+            }
         }
 
         // Get file size
@@ -399,10 +406,11 @@ class CheckpointService {
             'path' => $checkpointPath,
             'size' => $size,
             'created_at' => now()->toIso8601String(),
-            'locked' => false, // New checkpoints are not locked by default
-            'flagged' => false, // New checkpoints are not flagged by default
+            'locked' => false,
+            'flagged' => false,
             'note' => $note,
             'encrypted' => $encrypt,
+            'driver' => $driver->name(),
         ];
 
         // Add to checkpoints array
@@ -458,7 +466,6 @@ class CheckpointService {
      * @throws CheckpointException
      */
     public function restore(string $identifier): Checkpoint {
-        // Find the checkpoint
         $checkpoint = $this->find($identifier);
 
         if (! $checkpoint) {
@@ -467,37 +474,47 @@ class CheckpointService {
             );
         }
 
-        // Verify checkpoint file exists
         if (! File::exists($checkpoint->path)) {
             throw new CheckpointException(
                 "Checkpoint file not found: {$checkpoint->path}"
             );
         }
 
-        // Validate the checkpoint path is within storage directory (security check)
         $this->validateCheckpointPath($checkpoint->path);
 
-        // Get current database path
-        $databasePath = $this->getDatabasePath();
+        // Pick driver from the checkpoint's stored driver field (default sqlite)
+        $storedDriver = $checkpoint->driver ?? 'sqlite';
+        $currentConnection = $this->driverManager->connectionName();
+        $currentConnectionDriver = config("database.connections.{$currentConnection}.driver");
 
-        // Close all database connections to unlock the file
-        DB::disconnect();
-
-        // Replace the current database with the checkpoint
-        if ($checkpoint->encrypted) {
-            if (! $this->decryptFile($checkpoint->path, $databasePath)) {
-                throw new CheckpointException(
-                    "Failed to restore encrypted checkpoint. Could not decrypt file to: {$databasePath}"
-                );
-            }
-        } elseif (! File::copy($checkpoint->path, $databasePath)) {
+        // Mismatch guard: can't restore a MySQL dump into SQLite, etc.
+        if ($storedDriver !== $currentConnectionDriver) {
             throw new CheckpointException(
-                "Failed to restore checkpoint. Could not copy file to: {$databasePath}"
+                "Cannot restore a '{$storedDriver}' checkpoint while the active connection is '{$currentConnectionDriver}'. ".
+                'Switch your database connection or use a matching checkpoint.'
             );
         }
 
-        // Reconnect to the database
-        DB::reconnect();
+        $driver = $this->driverManager->driverForName($storedDriver, $currentConnection);
+
+        if ($checkpoint->encrypted) {
+            $tempPath = sys_get_temp_dir().'/tyro_restore_'.uniqid().$driver->fileExtension();
+
+            try {
+                if (! $this->decryptFile($checkpoint->path, $tempPath)) {
+                    throw new CheckpointException(
+                        'Failed to decrypt checkpoint for restore.'
+                    );
+                }
+                $driver->restoreSnapshot($tempPath);
+            } finally {
+                if (File::exists($tempPath)) {
+                    @unlink($tempPath);
+                }
+            }
+        } else {
+            $driver->restoreSnapshot($checkpoint->path);
+        }
 
         return $checkpoint;
     }
