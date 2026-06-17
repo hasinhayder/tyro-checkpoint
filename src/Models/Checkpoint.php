@@ -24,6 +24,7 @@ use Carbon\Carbon;
  * @property string|null $note
  * @property bool $encrypted
  * @property string $driver
+ * @property string|null $database
  */
 class Checkpoint {
     /**
@@ -77,6 +78,13 @@ class Checkpoint {
     public string $driver;
 
     /**
+     * Identity of the database this checkpoint belongs to
+     * (SQLite: file path, MySQL/PostgreSQL: database name).
+     * Null for legacy checkpoints created before this field existed.
+     */
+    public ?string $database;
+
+    /**
      * Create a new Checkpoint instance from array data.
      */
     public function __construct(array $data) {
@@ -92,6 +100,7 @@ class Checkpoint {
         $this->note = $data['note'] ?? null;
         $this->encrypted = $data['encrypted'] ?? false;
         $this->driver = $data['driver'] ?? 'sqlite';
+        $this->database = $data['database'] ?? null;
     }
 
     /**
@@ -109,6 +118,7 @@ class Checkpoint {
             'note' => $this->note,
             'encrypted' => $this->encrypted,
             'driver' => $this->driver,
+            'database' => $this->database,
         ];
     }
 

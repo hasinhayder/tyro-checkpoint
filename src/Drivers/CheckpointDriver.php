@@ -17,6 +17,17 @@ interface CheckpointDriver {
     public function fileExtension(): string;
 
     /**
+     * Identity of the target database this driver snapshots.
+     *
+     * SQLite: the database file path.
+     * MySQL/PostgreSQL: the configured database name.
+     *
+     * Used to record which database a checkpoint belongs to and to guard
+     * against restoring a snapshot into a different database of the same engine.
+     */
+    public function databaseName(): ?string;
+
+    /**
      * Verify that everything needed is available.
      *
      * @throws CheckpointException

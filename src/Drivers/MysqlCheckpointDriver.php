@@ -22,6 +22,10 @@ class MysqlCheckpointDriver implements CheckpointDriver {
         return '.sql';
     }
 
+    public function databaseName(): ?string {
+        return $this->getConnectionDatabase($this->connection);
+    }
+
     public function assertReady(): void {
         BinaryHelper::ensureAvailable($this->processRunner, $this->mysqldumpBin(), 'mysqldump', 'Install mysql-client');
         BinaryHelper::ensureAvailable($this->processRunner, $this->mysqlBin(), 'mysql', 'Install mysql-client');

@@ -23,7 +23,7 @@ class CheckpointRestoreCommand extends Command {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:restore {identifier? : Checkpoint ID or name to restore}';
+    protected $signature = 'tyro-checkpoint:restore {identifier? : Checkpoint ID or name to restore} {--force : Restore even if the database name does not match the checkpoint origin}';
 
     /**
      * The console command description.
@@ -97,6 +97,10 @@ class CheckpointRestoreCommand extends Command {
             $this->line('Checkpoint to restore:');
             $this->line("  ID:      {$checkpoint->id}");
             $this->line("  Name:    {$checkpoint->name}");
+            $this->line('  Driver:  '.$checkpoint->driver);
+            if ($checkpoint->database) {
+                $this->line('  Database:'.$checkpoint->database);
+            }
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
             if ($checkpoint->encrypted) {
@@ -116,7 +120,7 @@ class CheckpointRestoreCommand extends Command {
 
             // Restore the checkpoint
             $this->info('Restoring checkpoint...');
-            $service->restore((string) $identifier);
+            $service->restore((string) $identifier, (bool) $this->option('force'));
 
             // Success message
             $this->info("✓ Checkpoint '{$checkpoint->name}' restored successfully!");

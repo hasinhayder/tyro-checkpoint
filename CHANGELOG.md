@@ -11,7 +11,9 @@ All notable changes to Tyro Checkpoint will be documented in this file.
 - Add `ProcessRunner` abstraction (default: `SymfonyProcessRunner`) for testability and credential safety.
 - Add `connection` and `binaries` configuration options.
 - Add `driver` field to checkpoint metadata for forward compatibility.
-- Add `tyro-checkpoint:details` now shows the checkpoint driver.
+- Add `database` field to checkpoint metadata to track which database each checkpoint belongs to. Legacy checkpoints without this field are treated as SQLite.
+- Restore now guards against restoring a checkpoint into a different database of the same engine; bypass with the `--force` flag.
+- `tyro-checkpoint:details` and `tyro-checkpoint:list` now show the checkpoint driver and database.
 - `tyro-checkpoint:install` supports MySQL and PostgreSQL connections with binary validation.
 
 ### Changed

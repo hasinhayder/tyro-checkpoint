@@ -411,6 +411,7 @@ class CheckpointService {
             'note' => $note,
             'encrypted' => $encrypt,
             'driver' => $driver->name(),
+            'database' => $driver->databaseName(),
         ];
 
         // Add to checkpoints array
@@ -462,10 +463,11 @@ class CheckpointService {
      * Restore a checkpoint by replacing the current database with it.
      *
      * @param  string  $identifier  Checkpoint ID or name
+     * @param  bool  $force  Bypass the database-identity guard
      *
      * @throws CheckpointException
      */
-    public function restore(string $identifier): Checkpoint {
+    public function restore(string $identifier, bool $force = false): Checkpoint {
         $checkpoint = $this->find($identifier);
 
         if (! $checkpoint) {
@@ -487,7 +489,7 @@ class CheckpointService {
         $currentConnection = $this->driverManager->connectionName();
         $currentConnectionDriver = config("database.connections.{$currentConnection}.driver");
 
-        // Mismatch guard: can't restore a MySQL dump into SQLite, etc.
+        // Engine mismatch guard: can't restore a MySQL dump into SQLite, etc.
         if ($storedDriver !== $currentConnectionDriver) {
             throw new CheckpointException(
                 "Cannot restore a '{$storedDriver}' checkpoint while the active connection is '{$currentConnectionDriver}'. ".
@@ -496,6 +498,26 @@ class CheckpointService {
         }
 
         $driver = $this->driverManager->driverForName($storedDriver, $currentConnection);
+
+        // Database-identity guard: prevents restoring a snapshot from one database
+        // into another of the same engine (e.g. two MySQL databases).
+        // Skipped for legacy checkpoints that have no recorded database (treated as sqlite).
+        $currentDatabase = $driver->databaseName();
+
+        if (! $force && $checkpoint->database !== null && $currentDatabase === null) {
+            throw new CheckpointException(
+                "Cannot verify the checkpoint origin: the active connection '{$currentConnection}' ".
+                'has no configured database name. Set a database name or use --force.'
+            );
+        }
+
+        if (! $force && $checkpoint->database !== null && $currentDatabase !== null
+            && $checkpoint->database !== $currentDatabase) {
+            throw new CheckpointException(
+                "Cannot restore a checkpoint from database '{$checkpoint->database}' into database '{$currentDatabase}'. ".
+                'Use the --force flag to override.'
+            );
+        }
 
         if ($checkpoint->encrypted) {
             $tempPath = sys_get_temp_dir().'/tyro_restore_'.uniqid().$driver->fileExtension();

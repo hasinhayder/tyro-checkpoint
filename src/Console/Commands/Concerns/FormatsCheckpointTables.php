@@ -53,6 +53,23 @@ trait FormatsCheckpointTables {
         return $createdAt->format('d/m/y g:ia');
     }
 
+    private function formatTableDatabase(?string $database, int $maxLength = 24): string {
+        if (! $database) {
+            return '-';
+        }
+
+        // For file paths (SQLite), show the basename for readability.
+        if (str_contains($database, DIRECTORY_SEPARATOR)) {
+            $database = basename($database);
+        }
+
+        if (strlen($database) <= $maxLength) {
+            return $database;
+        }
+
+        return substr($database, 0, $maxLength).'...';
+    }
+
     private function isAutoCheckpoint($checkpoint): bool {
         $prefix = trim((string) config('tyro-checkpoint.auto_checkpoint.name_prefix', 'auto'), '_');
 

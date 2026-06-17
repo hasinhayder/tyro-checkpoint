@@ -153,6 +153,49 @@ class DriverManagerTest extends TestCase {
     }
 
     /** @test */
+    public function checkpoint_model_defaults_database_to_null_for_legacy_records(): void {
+        $checkpoint = new Checkpoint([
+            'id' => 1,
+            'name' => 'legacy',
+            'path' => '/tmp/test.sqlite',
+            'size' => 1024,
+            'created_at' => '2026-06-17 10:00:00',
+        ]);
+
+        $this->assertNull($checkpoint->database);
+    }
+
+    /** @test */
+    public function checkpoint_model_preserves_explicit_database(): void {
+        $checkpoint = new Checkpoint([
+            'id' => 1,
+            'name' => 'test',
+            'path' => '/tmp/test.sql',
+            'size' => 1024,
+            'created_at' => '2026-06-17 10:00:00',
+            'driver' => 'mysql',
+            'database' => 'tyro_app_dev',
+        ]);
+
+        $this->assertSame('tyro_app_dev', $checkpoint->database);
+
+        $array = $checkpoint->toArray();
+
+        $this->assertArrayHasKey('database', $array);
+        $this->assertSame('tyro_app_dev', $array['database']);
+    }
+
+    /** @test */
+    public function sqlite_driver_reports_database_basename_as_identity(): void {
+        config(['database.connections.sqlite.database' => '/var/tmp/app.sqlite']);
+
+        $driver = new SqliteCheckpointDriver('sqlite');
+
+        // Basename keeps the identity stable across project relocation.
+        $this->assertSame('app.sqlite', $driver->databaseName());
+    }
+
+    /** @test */
     public function process_result_stores_exit_code_and_output(): void {
         $result = new ProcessResult(
             exitCode: 0,

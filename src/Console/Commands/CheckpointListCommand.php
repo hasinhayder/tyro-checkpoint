@@ -69,6 +69,7 @@ class CheckpointListCommand extends Command {
                     $row[] = $service->formatFileSize($checkpoint->size);
                     $row[] = $this->formatTableCreated($checkpoint->created_at);
                 } else {
+                    $row[] = $this->formatTableDatabase($checkpoint->database);
                     $row[] = $this->formatTableNote($checkpoint->note);
                     $row[] = $service->formatFileSize($checkpoint->size);
                     $row[] = $this->formatTableCreated($checkpoint->created_at);
@@ -80,7 +81,7 @@ class CheckpointListCommand extends Command {
 
             $headers = $this->option('short')
                 ? ['ID', 'Name', 'Size', 'Created']
-                : ['ID', 'Name', 'Note', 'Size', 'Created', 'Enc'];
+                : ['ID', 'Name', 'Database', 'Note', 'Size', 'Created', 'Enc'];
 
             $this->table(
                 $headers,

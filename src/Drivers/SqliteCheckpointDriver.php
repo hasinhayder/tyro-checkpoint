@@ -22,6 +22,15 @@ class SqliteCheckpointDriver implements CheckpointDriver {
         return '.sqlite';
     }
 
+    public function databaseName(): ?string {
+        $path = $this->getConnectionDatabase($this->connection);
+
+        // Use the basename as a stable identity so checkpoints survive project
+        // relocation (cloning/moving the project directory). The full absolute
+        // path would change between machines and falsely block restores.
+        return $path ? basename($path) : null;
+    }
+
     public function assertReady(): void {
         $driver = $this->getConnectionDriver($this->connection);
 

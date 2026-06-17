@@ -22,6 +22,10 @@ class PostgresCheckpointDriver implements CheckpointDriver {
         return '.sql';
     }
 
+    public function databaseName(): ?string {
+        return $this->getConnectionDatabase($this->connection);
+    }
+
     public function assertReady(): void {
         BinaryHelper::ensureAvailable($this->processRunner, $this->pgDumpBin(), 'pg_dump', 'Install postgresql-client');
         BinaryHelper::ensureAvailable($this->processRunner, $this->psqlBin(), 'psql', 'Install postgresql-client');
