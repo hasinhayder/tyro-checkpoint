@@ -59,7 +59,9 @@ class CheckpointListCommand extends Command {
             $this->info("Found {$checkpoints->count()} checkpoint(s):");
             $this->line('');
 
-            $rows = $checkpoints->map(function ($checkpoint) use ($service) {
+            $showDatabase = ! $this->option('short') && $this->isMixedDatabases($checkpoints);
+
+            $rows = $checkpoints->map(function ($checkpoint) use ($service, $showDatabase) {
                 $row = [
                     $checkpoint->id,
                     $this->formatTableName($checkpoint),
@@ -69,8 +71,10 @@ class CheckpointListCommand extends Command {
                     $row[] = $service->formatFileSize($checkpoint->size);
                     $row[] = $this->formatTableCreated($checkpoint->created_at);
                 } else {
-                    $row[] = $this->formatTableDatabase($checkpoint->database);
-                    $row[] = $this->formatTableNote($checkpoint->note);
+                    if ($showDatabase) {
+                        $row[] = $this->formatDatabaseLabel($checkpoint);
+                    }
+                    $row[] = $this->formatTableNote($checkpoint);
                     $row[] = $service->formatFileSize($checkpoint->size);
                     $row[] = $this->formatTableCreated($checkpoint->created_at);
                     $row[] = $this->formatTableEncrypted($checkpoint->encrypted);
@@ -79,9 +83,15 @@ class CheckpointListCommand extends Command {
                 return $row;
             })->toArray();
 
-            $headers = $this->option('short')
-                ? ['ID', 'Name', 'Size', 'Created']
-                : ['ID', 'Name', 'Database', 'Note', 'Size', 'Created', 'Enc'];
+            $headers = ['ID', 'Name'];
+            if ($this->option('short')) {
+                $headers = ['ID', 'Name', 'Size', 'Created'];
+            } else {
+                if ($showDatabase) {
+                    $headers[] = 'Database';
+                }
+                $headers = array_merge($headers, ['Note', 'Size', 'Created', 'Enc']);
+            }
 
             $this->table(
                 $headers,

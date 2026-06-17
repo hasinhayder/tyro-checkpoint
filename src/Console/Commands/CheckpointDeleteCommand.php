@@ -52,8 +52,13 @@ class CheckpointDeleteCommand extends Command {
                 $this->line('');
 
                 // Display table of checkpoints
-                $headers = ['ID', 'Name', 'Note', 'Size', 'Created'];
-                $rows = $this->formatTableRows($checkpoints, $service);
+                $showDatabase = $this->isMixedDatabases($checkpoints);
+                $headers = ['ID', 'Name'];
+                if ($showDatabase) {
+                    $headers[] = 'Database';
+                }
+                $headers = array_merge($headers, ['Note', 'Size', 'Created']);
+                $rows = $this->formatTableRows($checkpoints, $service, $showDatabase);
                 $this->table($headers, $rows);
 
                 // Get available IDs for validation
@@ -136,16 +141,21 @@ class CheckpointDeleteCommand extends Command {
     /**
      * Format checkpoints data for table display.
      */
-    private function formatTableRows($checkpoints, $service): array {
+    private function formatTableRows($checkpoints, $service, bool $showDatabase = false): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
             $row = [
                 $checkpoint->id,
                 $this->formatTableName($checkpoint),
-                $this->formatTableNote($checkpoint->note),
-                $service->formatFileSize($checkpoint->size),
-                $this->formatTableCreated($checkpoint->created_at),
             ];
+
+            if ($showDatabase) {
+                $row[] = $this->formatDatabaseLabel($checkpoint);
+            }
+
+            $row[] = $this->formatTableNote($checkpoint);
+            $row[] = $service->formatFileSize($checkpoint->size);
+            $row[] = $this->formatTableCreated($checkpoint->created_at);
 
             $rows[] = $row;
         }

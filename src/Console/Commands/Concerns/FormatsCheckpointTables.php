@@ -37,7 +37,15 @@ trait FormatsCheckpointTables {
         return $locked ? '<comment>Yes</comment>' : 'No';
     }
 
-    private function formatTableNote(?string $note, int $maxLength = 40): string {
+    private function formatTableNote($checkpoint, int $maxLength = 40): string {
+        // Auto-created checkpoints show a concise label in tables; the full
+        // note is still rendered by the details command.
+        if ($this->isAutoCheckpoint($checkpoint)) {
+            return 'Auto-created';
+        }
+
+        $note = $checkpoint->note;
+
         if (! $note) {
             return '-';
         }
@@ -53,21 +61,37 @@ trait FormatsCheckpointTables {
         return $createdAt->format('d/m/y g:ia');
     }
 
-    private function formatTableDatabase(?string $database, int $maxLength = 24): string {
-        if (! $database) {
-            return '-';
+    /**
+     * Human-readable database label for table cells.
+     *
+     * SQLite -> "SQLite"; MySQL/PostgreSQL -> "<Label> (<database>)".
+     * Also doubles as the identity used by isMixedDatabases().
+     */
+    private function formatDatabaseLabel($checkpoint): string {
+        $driver = $checkpoint->driver ?? 'sqlite';
+        $database = $checkpoint->database;
+
+        return match ($driver) {
+            'mysql' => $database ? "MySQL ({$database})" : 'MySQL',
+            'pgsql' => $database ? "PG ({$database})" : 'PG',
+            default => 'SQLite',
+        };
+    }
+
+    /**
+     * True when the checkpoint set spans more than one database
+     * (by display label). Used to decide whether to show the Database column.
+     *
+     * @param  iterable  $checkpoints
+     */
+    private function isMixedDatabases($checkpoints): bool {
+        $labels = [];
+
+        foreach ($checkpoints as $checkpoint) {
+            $labels[$this->formatDatabaseLabel($checkpoint)] = true;
         }
 
-        // For file paths (SQLite), show the basename for readability.
-        if (str_contains($database, DIRECTORY_SEPARATOR)) {
-            $database = basename($database);
-        }
-
-        if (strlen($database) <= $maxLength) {
-            return $database;
-        }
-
-        return substr($database, 0, $maxLength).'...';
+        return count($labels) > 1;
     }
 
     private function isAutoCheckpoint($checkpoint): bool {

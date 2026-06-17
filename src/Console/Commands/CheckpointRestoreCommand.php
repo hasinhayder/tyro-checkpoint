@@ -52,8 +52,13 @@ class CheckpointRestoreCommand extends Command {
                 $this->line('');
 
                 // Display table of checkpoints
-                $headers = ['ID', 'Name', 'Note', 'Size', 'Created', 'Enc'];
-                $rows = $this->formatTableRows($checkpoints, $service);
+                $showDatabase = $this->isMixedDatabases($checkpoints);
+                $headers = ['ID', 'Name'];
+                if ($showDatabase) {
+                    $headers[] = 'Database';
+                }
+                $headers = array_merge($headers, ['Note', 'Size', 'Created', 'Enc']);
+                $rows = $this->formatTableRows($checkpoints, $service, $showDatabase);
                 $this->table($headers, $rows);
 
                 // Get available IDs for validation
@@ -145,17 +150,22 @@ class CheckpointRestoreCommand extends Command {
     /**
      * Format checkpoints data for table display.
      */
-    private function formatTableRows($checkpoints, $service): array {
+    private function formatTableRows($checkpoints, $service, bool $showDatabase = false): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
             $row = [
                 $checkpoint->id,
                 $this->formatTableName($checkpoint),
-                $this->formatTableNote($checkpoint->note),
-                $service->formatFileSize($checkpoint->size),
-                $this->formatTableCreated($checkpoint->created_at),
-                $this->formatTableEncrypted($checkpoint->encrypted),
             ];
+
+            if ($showDatabase) {
+                $row[] = $this->formatDatabaseLabel($checkpoint);
+            }
+
+            $row[] = $this->formatTableNote($checkpoint);
+            $row[] = $service->formatFileSize($checkpoint->size);
+            $row[] = $this->formatTableCreated($checkpoint->created_at);
+            $row[] = $this->formatTableEncrypted($checkpoint->encrypted);
 
             $rows[] = $row;
         }

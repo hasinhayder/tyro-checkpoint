@@ -91,17 +91,32 @@ class CheckpointDetailsCommand extends Command {
         $this->info('Available checkpoints:');
         $this->line('');
 
+        $showDatabase = $this->isMixedDatabases($checkpoints);
+
+        $headers = ['ID', 'Name'];
+        if ($showDatabase) {
+            $headers[] = 'Database';
+        }
+        $headers = array_merge($headers, ['Note', 'Size', 'Created', 'Enc']);
+
         $this->table(
-            ['ID', 'Name', 'Note', 'Size', 'Created', 'Enc'],
-            $checkpoints->map(function ($checkpoint) use ($service) {
-                return [
+            $headers,
+            $checkpoints->map(function ($checkpoint) use ($service, $showDatabase) {
+                $row = [
                     $checkpoint->id,
                     $this->formatTableName($checkpoint),
-                    $this->formatTableNote($checkpoint->note),
-                    $service->formatFileSize($checkpoint->size),
-                    $this->formatTableCreated($checkpoint->created_at),
-                    $this->formatTableEncrypted($checkpoint->encrypted),
                 ];
+
+                if ($showDatabase) {
+                    $row[] = $this->formatDatabaseLabel($checkpoint);
+                }
+
+                $row[] = $this->formatTableNote($checkpoint);
+                $row[] = $service->formatFileSize($checkpoint->size);
+                $row[] = $this->formatTableCreated($checkpoint->created_at);
+                $row[] = $this->formatTableEncrypted($checkpoint->encrypted);
+
+                return $row;
             })->toArray()
         );
 

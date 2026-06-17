@@ -50,15 +50,27 @@ class CheckpointFlushCommand extends Command {
             $this->line('');
 
             // Display checkpoints in a table
-            $headers = ['ID', 'Name', 'Size', 'Created', 'locked'];
-            $rows = $checkpoints->map(function ($checkpoint) use ($service) {
-                return [
+            $showDatabase = $this->isMixedDatabases($checkpoints);
+            $headers = ['ID', 'Name'];
+            if ($showDatabase) {
+                $headers[] = 'Database';
+            }
+            $headers = array_merge($headers, ['Size', 'Created', 'locked']);
+            $rows = $checkpoints->map(function ($checkpoint) use ($service, $showDatabase) {
+                $row = [
                     $checkpoint->id,
                     $this->formatTableName($checkpoint),
-                    $service->formatFileSize($checkpoint->size),
-                    $this->formatTableCreated($checkpoint->created_at),
-                    $this->formatTableLocked($checkpoint->locked),
                 ];
+
+                if ($showDatabase) {
+                    $row[] = $this->formatDatabaseLabel($checkpoint);
+                }
+
+                $row[] = $service->formatFileSize($checkpoint->size);
+                $row[] = $this->formatTableCreated($checkpoint->created_at);
+                $row[] = $this->formatTableLocked($checkpoint->locked);
+
+                return $row;
             })->toArray();
 
             $this->table($headers, $rows);

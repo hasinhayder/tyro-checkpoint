@@ -119,7 +119,7 @@ class CheckpointAddNoteCommand extends Command {
         foreach ($checkpoints as $checkpoint) {
             $label = "#{$checkpoint->id} - {$checkpoint->name}";
             if ($checkpoint->note) {
-                $label .= ' (Current note: '.$this->formatTableNote($checkpoint->note).')';
+                $label .= ' (Current note: '.$this->formatTableNote($checkpoint).')';
             }
             $options[$index] = $label;
             $indexMap[$index] = $checkpoint->id;
@@ -151,7 +151,7 @@ class CheckpointAddNoteCommand extends Command {
         // Show current note if exists
         if ($checkpoint->note) {
             $this->line('');
-            $this->info('Current note: '.$this->formatTableNote($checkpoint->note));
+            $this->info('Current note: '.$this->formatTableNote($checkpoint));
         }
 
         // Ask for the new note
@@ -213,7 +213,7 @@ class CheckpointAddNoteCommand extends Command {
             ];
 
             if ($checkpoint->note) {
-                $row[] = $this->formatTableNote($checkpoint->note);
+                $row[] = $this->formatTableNote($checkpoint);
             } else {
                 $row[] = '<comment>No note</comment>';
             }
