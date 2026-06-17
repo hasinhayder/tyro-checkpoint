@@ -97,12 +97,24 @@ class SymfonyProcessRunner implements ProcessRunner {
 
     private function buildProcess(array $command, array $env): Process {
         $process = new Process($command);
-        $process->setTimeout(600);
+        $process->setTimeout($this->timeoutSeconds());
 
         if ($env !== []) {
             $process->setEnv(array_merge($_ENV, $_SERVER, $env));
         }
 
         return $process;
+    }
+
+    /**
+     * Resolve the per-process timeout from config. Large databases can take
+     * well over the Symfony default, so this is generous and user-tunable.
+     * Falls back to the default for missing/empty/non-positive values so a
+     * misconfigured env var never disables the guard.
+     */
+    private function timeoutSeconds(): float {
+        $timeout = config('tyro-checkpoint.process.timeout', 600);
+
+        return is_numeric($timeout) && $timeout > 0 ? (float) $timeout : 600.0;
     }
 }

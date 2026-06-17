@@ -62,6 +62,34 @@ trait FormatsCheckpointTables {
     }
 
     /**
+     * Build table rows shared by the select-then-act commands (delete, restore,
+     * encrypt). Centralized here so the layout cannot drift between commands.
+     *
+     * @param  iterable  $checkpoints
+     */
+    private function formatTableRows($checkpoints, $service, bool $showDatabase = false): array {
+        $rows = [];
+        foreach ($checkpoints as $checkpoint) {
+            $row = [
+                $checkpoint->id,
+                $this->formatTableName($checkpoint),
+            ];
+
+            if ($showDatabase) {
+                $row[] = $this->formatDatabaseLabel($checkpoint);
+            }
+
+            $row[] = $this->formatTableNote($checkpoint);
+            $row[] = $service->formatFileSize($checkpoint->size);
+            $row[] = $this->formatTableCreated($checkpoint->created_at);
+
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
      * Human-readable database label for table cells.
      *
      * SQLite -> "SQLite"; MySQL/PostgreSQL -> "<Label> (<database>)".

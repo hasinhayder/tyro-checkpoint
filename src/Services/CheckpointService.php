@@ -776,6 +776,136 @@ class CheckpointService {
     }
 
     /**
+     * Encrypt an existing (unencrypted) checkpoint in place.
+     *
+     * The checkpoint's snapshot file is encrypted, the original unencrypted
+     * snapshot is removed, and the metadata is updated so the checkpoint stays
+     * restorable (restore auto-decrypts encrypted checkpoints). No new entry is
+     * added to the checkpoints list.
+     *
+     * @param  string  $identifier  Checkpoint ID or name
+     *
+     * @throws CheckpointException
+     */
+    public function encrypt(string $identifier): Checkpoint {
+        // Find the checkpoint
+        $checkpoint = $this->find($identifier);
+
+        if (! $checkpoint) {
+            throw new CheckpointException(
+                "Checkpoint not found: {$identifier}"
+            );
+        }
+
+        if ($checkpoint->encrypted) {
+            throw new CheckpointException(
+                "Checkpoint '{$checkpoint->name}' is already encrypted."
+            );
+        }
+
+        if (! File::exists($checkpoint->path)) {
+            throw new CheckpointException(
+                "Checkpoint file not found: {$checkpoint->path}"
+            );
+        }
+
+        // Validate the checkpoint path is within storage directory (security check)
+        $this->validateCheckpointPath($checkpoint->path);
+
+        $encryptionKey = $this->getEncryptionKey();
+
+        if (! $encryptionKey) {
+            throw new CheckpointException(
+                "Encryption key not found in the config or env file. Please run 'php artisan tyro-checkpoint:generate-key' first."
+            );
+        }
+
+        // Write the ciphertext to a distinct sidecar file ({$path}.enc) instead
+        // of overwriting the plaintext in place. The plaintext is left intact
+        // until the metadata has been committed, which keeps the on-disk file
+        // and the metadata's `encrypted` flag consistent at every step:
+        // if anything below fails, the checkpoint stays a valid (unencrypted)
+        // checkpoint rather than becoming silently broken.
+        $originalPath = $checkpoint->path;
+        $encryptedPath = $originalPath.'.enc';
+
+        // Encrypt to a temp file first, then move it into storage as the sidecar.
+        $tempPath = sys_get_temp_dir().'/tyro_encrypt_'.uniqid();
+
+        try {
+            if (! $this->encryptFile($originalPath, $tempPath)) {
+                throw new CheckpointException(
+                    "Failed to encrypt checkpoint file: {$originalPath}"
+                );
+            }
+
+            if (! rename($tempPath, $encryptedPath)) {
+                throw new CheckpointException(
+                    "Failed to write encrypted checkpoint file: {$encryptedPath}"
+                );
+            }
+        } catch (\Throwable $e) {
+            // Clean up any partial sidecar/temp we created before failing.
+            if (File::exists($tempPath)) {
+                @unlink($tempPath);
+            }
+            if (File::exists($encryptedPath)) {
+                @unlink($encryptedPath);
+            }
+
+            throw $e;
+        }
+
+        $newSize = File::size($encryptedPath);
+
+        // Commit the metadata FIRST: point at the encrypted sidecar and flip the
+        // flag. The plaintext at $originalPath is still on disk at this point.
+        $checkpoints = $this->loadCheckpoints();
+        $updated = false;
+
+        foreach ($checkpoints as &$data) {
+            if ($data['id'] === $checkpoint->id) {
+                $data['path'] = $encryptedPath;
+                $data['encrypted'] = true;
+                $data['size'] = $newSize;
+                $updated = true;
+                break;
+            }
+        }
+        unset($data);
+
+        if (! $updated) {
+            // No matching entry — remove the orphaned sidecar we just created.
+            if (File::exists($encryptedPath)) {
+                @unlink($encryptedPath);
+            }
+
+            throw new CheckpointException(
+                "Failed to encrypt checkpoint: {$identifier}"
+            );
+        }
+
+        try {
+            $this->saveCheckpoints($checkpoints);
+        } catch (\Throwable $e) {
+            // Metadata failed to commit: roll back to a consistent unencrypted
+            // state. The plaintext is still intact and metadata is unchanged.
+            if (File::exists($encryptedPath)) {
+                @unlink($encryptedPath);
+            }
+
+            throw $e;
+        }
+
+        // Metadata committed — safe to remove the original plaintext snapshot.
+        if (File::exists($originalPath)) {
+            @unlink($originalPath);
+        }
+
+        return new Checkpoint($checkpoints[array_search($checkpoint->id, array_column($checkpoints, 'id'))]);
+    }
+
+    /**
      * Get the encryption key from config.
      */
     protected function getEncryptionKey(): ?string {

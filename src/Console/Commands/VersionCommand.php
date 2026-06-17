@@ -19,7 +19,7 @@ class VersionCommand extends Command {
      * Execute the console command.
      */
     public function handle(): int {
-        $version = '1.6.0'; // MySQL & PostgreSQL support via driver abstraction
+        $version = '1.7.0'; // In-place checkpoint encryption & configurable process timeout
 
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
@@ -40,6 +40,7 @@ class VersionCommand extends Command {
     }
 }
 
+// 1.7.0 - In-place checkpoint encryption & configurable process timeout
 // 1.6.0 - MySQL & PostgreSQL support via driver abstraction
 // 1.5.0 - Add auto checkpoints and checkpoint details command
 // 1.4.0 - Add silent checkpoint creation option

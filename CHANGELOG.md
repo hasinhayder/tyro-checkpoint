@@ -2,6 +2,19 @@
 
 All notable changes to Tyro Checkpoint will be documented in this file.
 
+## [1.7.0] - 2026-06-17
+
+### Added
+
+- Add `tyro-checkpoint:encrypt` command to encrypt an existing unencrypted checkpoint in place. The command lists only unencrypted checkpoints, prompts for an ID, encrypts the snapshot, removes the original unencrypted file, and updates the metadata so the checkpoint remains restorable. No new checkpoint entry is created. Running it on an already-encrypted checkpoint is an idempotent no-op (it will not double-encrypt).
+- Add `CheckpointService::encrypt()` for in-place encryption of an existing checkpoint.
+- Add configurable `tyro-checkpoint.process.timeout` (env: `TYRO_CHECKPOINT_PROCESS_TIMEOUT`, default 600s) so large databases don't time out during snapshot/restore operations.
+
+### Changed
+
+- `tyro-checkpoint:encrypt` is now idempotent: running it on an already-encrypted checkpoint is a successful no-op rather than an error.
+- `SymfonyProcessRunner` now reads the process timeout from config instead of a hardcoded 600 seconds.
+
 ## [1.6.0] - 2026-06-17
 
 ### Added

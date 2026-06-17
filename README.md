@@ -238,6 +238,35 @@ Enter note for checkpoint #1 (or press Enter to remove existing note):
 
 The note will be displayed when you list checkpoints.
 
+### Encrypt an Existing Checkpoint
+
+Encrypt an existing unencrypted checkpoint **in place**. This secures the snapshot without creating a new checkpoint entry:
+
+```bash
+php artisan tyro-checkpoint:encrypt 1
+php artisan tyro-checkpoint:encrypt clean_database
+```
+
+If no identifier is provided, only the **unencrypted** checkpoints are listed and you can pick one by ID:
+
+```
+Unencrypted checkpoints:
+
++----+---------------------------+---------+---------------------+--------+
+| ID | Name                      | Size    | Created At          | Note   |
++----+---------------------------+---------+---------------------+--------+
+| 1  | clean_database            | 1.98 MB | 2026-02-01 10:00:00 |        |
++----+---------------------------+---------+---------------------+--------+
+
+Enter checkpoint ID to encrypt (0 to quit):
+```
+
+After encryption, the original unencrypted snapshot is removed and the checkpoint metadata is updated so it stays restorable (restore auto-decrypts encrypted checkpoints). No new entry is added to the list.
+
+> **Idempotent**: running `tyro-checkpoint:encrypt` on an already-encrypted checkpoint is a no-op — it will not double-encrypt, since re-encrypting ciphertext would make the checkpoint unrestorable.
+
+> **Note**: An encryption key is required. Generate one first with `php artisan tyro-checkpoint:generate-key`.
+
 ### Lock/Unlock a Checkpoint
 
 Lock a checkpoint to prevent accidental deletion:
@@ -466,6 +495,11 @@ return [
 
     // Encryption key (automatically set via artisan tyro-checkpoint:generate-key)
     'encryption_key' => env('TYRO_CHECKPOINT_ENCRYPTION_KEY'),
+
+    // Process timeout (seconds) for snapshot/restore operations (mysqldump, pg_dump, ...)
+    'process' => [
+        'timeout' => env('TYRO_CHECKPOINT_PROCESS_TIMEOUT', 600),
+    ],
 
     // Auto checkpoints before risky Artisan commands
     'auto_checkpoint' => [

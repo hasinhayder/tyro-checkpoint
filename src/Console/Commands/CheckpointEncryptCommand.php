@@ -8,27 +8,29 @@ use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use Illuminate\Console\Command;
 
 /**
- * CheckpointDeleteCommand
+ * CheckpointEncryptCommand
  *
- * Deletes a database checkpoint and its associated file.
+ * Encrypts an existing (unencrypted) database checkpoint in place.
+ * The original unencrypted snapshot is removed and the metadata is updated
+ * so the checkpoint remains restorable. No new checkpoint entry is added.
  *
  * Usage:
- *   php artisan tyro-checkpoint:delete
- *   php artisan tyro-checkpoint:delete 1
- *   php artisan tyro-checkpoint:delete my_checkpoint
+ *   php artisan tyro-checkpoint:encrypt
+ *   php artisan tyro-checkpoint:encrypt 1
+ *   php artisan tyro-checkpoint:encrypt my_checkpoint
  */
-class CheckpointDeleteCommand extends Command {
+class CheckpointEncryptCommand extends Command {
     use FormatsCheckpointTables;
 
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:delete {identifier? : Checkpoint ID or name to delete}';
+    protected $signature = 'tyro-checkpoint:encrypt {identifier? : Checkpoint ID or name to encrypt}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Delete a database checkpoint';
+    protected $description = 'Encrypt an existing database checkpoint in place';
 
     /**
      * Execute the console command.
@@ -40,15 +42,16 @@ class CheckpointDeleteCommand extends Command {
 
             // If no identifier provided, ask the user to select one
             if (! $identifier) {
-                $checkpoints = $service->list();
+                // Only show checkpoints which are not encrypted yet
+                $checkpoints = $service->list()->reject(fn ($c) => $c->encrypted)->values();
 
                 if ($checkpoints->isEmpty()) {
-                    $this->error('✗ No checkpoints found.');
+                    $this->info('No unencrypted checkpoints found.');
 
-                    return self::FAILURE;
+                    return self::SUCCESS;
                 }
 
-                $this->info('Available checkpoints:');
+                $this->info('Unencrypted checkpoints:');
                 $this->line('');
 
                 // Display table of checkpoints
@@ -65,7 +68,7 @@ class CheckpointDeleteCommand extends Command {
                 $availableIds = $checkpoints->pluck('id')->toArray();
 
                 $this->line('');
-                $input = $this->ask('Enter checkpoint ID to delete (0 to quit)');
+                $input = $this->ask('Enter checkpoint ID to encrypt (0 to quit)');
 
                 // Handle quit
                 if ($input === '0' || $input === 0) {
@@ -96,32 +99,48 @@ class CheckpointDeleteCommand extends Command {
                 return self::FAILURE;
             }
 
-            // Show checkpoint info and ask for confirmation
-            $this->line('Checkpoint to delete:');
-            $this->line("  ID:      {$checkpoint->id}");
-            $this->line("  Name:    {$checkpoint->name}");
-            $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
-            $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
-            if ($checkpoint->locked) {
-                $this->line('  Status:  <comment>Locked</comment>');
-            }
-            if ($checkpoint->note) {
-                $this->line("  Note:    {$checkpoint->note}");
-            }
-            $this->line('');
-
-            // Ask for confirmation
-            if (! $this->confirm('Are you sure you want to delete this checkpoint?', false)) {
-                $this->info('Delete cancelled.');
+            if ($checkpoint->encrypted) {
+                // Idempotent: do not double-encrypt. Re-encrypting ciphertext
+                // would make the checkpoint unrestorable, so treat this as a
+                // successful no-op rather than an error.
+                $this->info("✓ Checkpoint '{$checkpoint->name}' is already encrypted. Nothing to do.");
 
                 return self::SUCCESS;
             }
 
-            // Delete the checkpoint
-            $service->delete((string) $identifier);
+            // Show checkpoint info and ask for confirmation
+            $this->line('Checkpoint to encrypt:');
+            $this->line("  ID:      {$checkpoint->id}");
+            $this->line("  Name:    {$checkpoint->name}");
+            $this->line('  Driver:  '.$checkpoint->driver);
+            $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
+            $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
+            if ($checkpoint->note) {
+                $this->line("  Note:    {$checkpoint->note}");
+            }
+            $this->line('');
+            $this->line('The original unencrypted snapshot will be removed after encryption.');
+            $this->line('The checkpoint will remain restorable and is auto-decrypted on restore.');
+            $this->line('');
+
+            // Ask for confirmation
+            if (! $this->confirm('Do you want to proceed?', false)) {
+                $this->info('Encrypt cancelled.');
+
+                return self::SUCCESS;
+            }
+
+            // Encrypt the checkpoint in place
+            $this->info('Encrypting checkpoint...');
+            $encrypted = $service->encrypt((string) $identifier);
 
             // Success message
-            $this->info("✓ Checkpoint '{$checkpoint->name}' deleted successfully!");
+            $this->info("✓ Checkpoint '{$encrypted->name}' encrypted successfully!");
+            $this->line('');
+            $this->line("  ID:      {$encrypted->id}");
+            $this->line("  Name:    {$encrypted->name}");
+            $this->line('  Status:  <comment>Encrypted</comment>');
+            $this->line("  Size:    {$service->formatFileSize($encrypted->size)}");
             $this->line('');
 
             return self::SUCCESS;

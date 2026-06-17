@@ -62,6 +62,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Process Timeout
+    |--------------------------------------------------------------------------
+    |
+    | Maximum time in seconds allowed for a single snapshot/restore operation
+    | (mysqldump, mysql, pg_dump, psql). Large databases can take well over the
+    | default 30s, so this is set generously. Increase it via the
+    | TYRO_CHECKPOINT_PROCESS_TIMEOUT env var for very large databases.
+    |
+    */
+
+    'process' => [
+        'timeout' => env('TYRO_CHECKPOINT_PROCESS_TIMEOUT', 600),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | MySQL Driver Options
     |--------------------------------------------------------------------------
     */
