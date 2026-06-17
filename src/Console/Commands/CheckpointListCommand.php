@@ -22,7 +22,7 @@ class CheckpointListCommand extends Command {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:list {identifier? : Checkpoint ID or name to inspect}';
+    protected $signature = 'tyro-checkpoint:list {identifier? : Checkpoint ID or name to inspect} {--s|short : Show a short list with only ID, name, and date}';
 
     /**
      * The console command description.
@@ -60,18 +60,30 @@ class CheckpointListCommand extends Command {
             $this->line('');
 
             $rows = $checkpoints->map(function ($checkpoint) use ($service) {
-                return [
+                $row = [
                     $checkpoint->id,
                     $this->formatTableName($checkpoint),
-                    $this->formatTableNote($checkpoint->note),
-                    $service->formatFileSize($checkpoint->size),
-                    $this->formatTableCreated($checkpoint->created_at),
-                    $this->formatTableEncrypted($checkpoint->encrypted),
                 ];
+
+                if ($this->option('short')) {
+                    $row[] = $service->formatFileSize($checkpoint->size);
+                    $row[] = $this->formatTableCreated($checkpoint->created_at);
+                } else {
+                    $row[] = $this->formatTableNote($checkpoint->note);
+                    $row[] = $service->formatFileSize($checkpoint->size);
+                    $row[] = $this->formatTableCreated($checkpoint->created_at);
+                    $row[] = $this->formatTableEncrypted($checkpoint->encrypted);
+                }
+
+                return $row;
             })->toArray();
 
+            $headers = $this->option('short')
+                ? ['ID', 'Name', 'Size', 'Created']
+                : ['ID', 'Name', 'Note', 'Size', 'Created', 'Enc'];
+
             $this->table(
-                ['ID', 'Name', 'Note', 'Size', 'Created', 'Enc'],
+                $headers,
                 $rows
             );
 
