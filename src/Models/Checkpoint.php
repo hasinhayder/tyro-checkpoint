@@ -20,6 +20,7 @@ use Carbon\Carbon;
  * @property int $size
  * @property Carbon $created_at
  * @property bool $locked
+ * @property bool $flagged
  * @property string|null $note
  * @property bool $encrypted
  */
@@ -55,6 +56,11 @@ class Checkpoint {
     public bool $locked;
 
     /**
+     * Whether the checkpoint is flagged
+     */
+    public bool $flagged;
+
+    /**
      * Optional note for the checkpoint
      */
     public ?string $note;
@@ -76,6 +82,7 @@ class Checkpoint {
             ? Carbon::parse($data['created_at'])
             : $data['created_at'];
         $this->locked = $data['locked'] ?? false;
+        $this->flagged = $data['flagged'] ?? false;
         $this->note = $data['note'] ?? null;
         $this->encrypted = $data['encrypted'] ?? false;
     }
@@ -91,6 +98,7 @@ class Checkpoint {
             'size' => $this->size,
             'created_at' => $this->created_at->toIso8601String(),
             'locked' => $this->locked,
+            'flagged' => $this->flagged,
             'note' => $this->note,
             'encrypted' => $this->encrypted,
         ];

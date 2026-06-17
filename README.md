@@ -162,6 +162,28 @@ Found 3 checkpoint(s):
 +----+---------------------------+---------+---------------------+--------+-----------+-------+
 ```
 
+### View Checkpoint Details
+
+Inspect a checkpoint by ID or name:
+
+```bash
+php artisan tyro-checkpoint:details 1
+php artisan tyro-checkpoint:details clean_database
+```
+
+You can also use `tyro-checkpoint:list` with an ID or name as a shortcut:
+
+```bash
+php artisan tyro-checkpoint:list 1
+php artisan tyro-checkpoint:list clean_database
+```
+
+If no identifier is provided, you can choose from the checkpoint list:
+
+```bash
+php artisan tyro-checkpoint:details
+```
+
 ### Restore a Checkpoint
 
 Restore a checkpoint by ID:
@@ -228,6 +250,22 @@ php artisan tyro-checkpoint:unlock 1
 ```
 
 Locked checkpoints cannot be deleted individually or via the flush command. This is useful for preserving important baseline states.
+
+### Flag/Unflag a Checkpoint
+
+Flag a checkpoint to mark it for attention:
+
+```bash
+php artisan tyro-checkpoint:flag 1
+```
+
+Unflag a checkpoint when it no longer needs attention:
+
+```bash
+php artisan tyro-checkpoint:unflag 1
+```
+
+If no identifier is provided, both commands ask for the checkpoint ID or name. Flagged checkpoints show a 🚩 marker in checkpoint tables.
 
 ### Delete a Checkpoint
 

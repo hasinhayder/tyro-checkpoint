@@ -2,6 +2,7 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
+use HasinHayder\TyroCheckpoint\Console\Commands\Concerns\FormatsCheckpointTables;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use Illuminate\Console\Command;
@@ -16,6 +17,8 @@ use Illuminate\Console\Command;
  *   php artisan tyro-checkpoint:add-note {id}
  */
 class CheckpointAddNoteCommand extends Command {
+    use FormatsCheckpointTables;
+
     /**
      * The name and signature of the console command.
      */
@@ -116,7 +119,7 @@ class CheckpointAddNoteCommand extends Command {
         foreach ($checkpoints as $checkpoint) {
             $label = "#{$checkpoint->id} - {$checkpoint->name}";
             if ($checkpoint->note) {
-                $label .= ' (Current note: '.$this->truncateNote($checkpoint->note).')';
+                $label .= ' (Current note: '.$this->formatTableNote($checkpoint->note).')';
             }
             $options[$index] = $label;
             $indexMap[$index] = $checkpoint->id;
@@ -148,7 +151,7 @@ class CheckpointAddNoteCommand extends Command {
         // Show current note if exists
         if ($checkpoint->note) {
             $this->line('');
-            $this->info('Current note: '.$this->truncateNote($checkpoint->note));
+            $this->info('Current note: '.$this->formatTableNote($checkpoint->note));
         }
 
         // Ask for the new note
@@ -175,17 +178,6 @@ class CheckpointAddNoteCommand extends Command {
             $this->info("✓ Note removed from checkpoint: {$checkpoint->name}");
         }
         $this->line('');
-    }
-
-    /**
-     * Truncate note for display purposes.
-     */
-    private function truncateNote(string $note, int $maxLength = 50): string {
-        if (strlen($note) <= $maxLength) {
-            return $note;
-        }
-
-        return substr($note, 0, $maxLength).'...';
     }
 
     /**
@@ -217,11 +209,11 @@ class CheckpointAddNoteCommand extends Command {
         foreach ($checkpoints as $checkpoint) {
             $row = [
                 "#{$checkpoint->id}",
-                $checkpoint->name,
+                $this->formatTableName($checkpoint),
             ];
 
             if ($checkpoint->note) {
-                $row[] = $this->truncateNote($checkpoint->note, 30); // Shorter for table view
+                $row[] = $this->formatTableNote($checkpoint->note);
             } else {
                 $row[] = '<comment>No note</comment>';
             }

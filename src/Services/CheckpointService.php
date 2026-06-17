@@ -400,6 +400,7 @@ class CheckpointService {
             'size' => $size,
             'created_at' => now()->toIso8601String(),
             'locked' => false, // New checkpoints are not locked by default
+            'flagged' => false, // New checkpoints are not flagged by default
             'note' => $note,
             'encrypted' => $encrypt,
         ];
@@ -626,6 +627,66 @@ class CheckpointService {
         $this->saveCheckpoints($checkpoints);
 
         // Return updated checkpoint
+        return new Checkpoint($checkpoints[array_search($checkpoint->id, array_column($checkpoints, 'id'))]);
+    }
+
+    /**
+     * Flag a checkpoint for attention.
+     *
+     * @param  string  $identifier  Checkpoint ID or name
+     *
+     * @throws CheckpointException
+     */
+    public function flag(string $identifier): Checkpoint {
+        return $this->setFlagged($identifier, true);
+    }
+
+    /**
+     * Unflag a checkpoint.
+     *
+     * @param  string  $identifier  Checkpoint ID or name
+     *
+     * @throws CheckpointException
+     */
+    public function unflag(string $identifier): Checkpoint {
+        return $this->setFlagged($identifier, false);
+    }
+
+    /**
+     * Set the flagged status for a checkpoint.
+     *
+     * @param  string  $identifier  Checkpoint ID or name
+     *
+     * @throws CheckpointException
+     */
+    private function setFlagged(string $identifier, bool $flagged): Checkpoint {
+        $checkpoint = $this->find($identifier);
+
+        if (! $checkpoint) {
+            throw new CheckpointException(
+                "Checkpoint not found: {$identifier}"
+            );
+        }
+
+        $checkpoints = $this->loadCheckpoints();
+        $updated = false;
+
+        foreach ($checkpoints as &$data) {
+            if ($data['id'] === $checkpoint->id) {
+                $data['flagged'] = $flagged;
+                $updated = true;
+                break;
+            }
+        }
+
+        if (! $updated) {
+            throw new CheckpointException(
+                "Failed to update flagged status for checkpoint: {$identifier}"
+            );
+        }
+
+        $this->saveCheckpoints($checkpoints);
+
         return new Checkpoint($checkpoints[array_search($checkpoint->id, array_column($checkpoints, 'id'))]);
     }
 

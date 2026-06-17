@@ -2,6 +2,7 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
+use HasinHayder\TyroCheckpoint\Console\Commands\Concerns\FormatsCheckpointTables;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use Illuminate\Console\Command;
@@ -17,6 +18,8 @@ use Illuminate\Console\Command;
  *   php artisan tyro-checkpoint:restore my_checkpoint
  */
 class CheckpointRestoreCommand extends Command {
+    use FormatsCheckpointTables;
+
     /**
      * The name and signature of the console command.
      */
@@ -49,7 +52,7 @@ class CheckpointRestoreCommand extends Command {
                 $this->line('');
 
                 // Display table of checkpoints
-                $headers = ['ID', 'Name', 'Note', 'Size', 'Created', 'Encrypted'];
+                $headers = ['ID', 'Name', 'Note', 'Size', 'Created', 'Enc'];
                 $rows = $this->formatTableRows($checkpoints, $service);
                 $this->table($headers, $rows);
 
@@ -136,33 +139,18 @@ class CheckpointRestoreCommand extends Command {
     }
 
     /**
-     * Truncate note for display purposes.
-     */
-    private function truncateNote(string $note, int $maxLength = 20): string {
-        if (strlen($note) <= $maxLength) {
-            return $note;
-        }
-
-        return substr($note, 0, $maxLength).'...';
-    }
-
-    /**
      * Format checkpoints data for table display.
      */
     private function formatTableRows($checkpoints, $service): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
-            $name = $checkpoint->name;
-            if ($checkpoint->locked) {
-                $name .= ' 🔒';
-            }
             $row = [
                 $checkpoint->id,
-                $name,
-                $checkpoint->note ? $this->truncateNote($checkpoint->note) : '-',
+                $this->formatTableName($checkpoint),
+                $this->formatTableNote($checkpoint->note),
                 $service->formatFileSize($checkpoint->size),
-                $checkpoint->created_at->format('Y-m-d H:i:s'),
-                $checkpoint->encrypted ? 'Yes' : 'No',
+                $this->formatTableCreated($checkpoint->created_at),
+                $this->formatTableEncrypted($checkpoint->encrypted),
             ];
 
             $rows[] = $row;

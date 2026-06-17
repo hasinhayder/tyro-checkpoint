@@ -7,6 +7,9 @@ All notable changes to Tyro Checkpoint will be documented in this file.
 ### Added
 
 - Add opt-in auto-checkpoints before risky Artisan commands like migrations, seeders, and database wipes.
+- Add `tyro-checkpoint:details` command to inspect a checkpoint by ID or name.
+- Add `tyro-checkpoint:list {identifier}` as a shortcut for checkpoint details.
+- Add `tyro-checkpoint:flag` and `tyro-checkpoint:unflag` commands to mark checkpoints with a flag icon.
 
 ## [1.4.0] - 2026-06-17
 

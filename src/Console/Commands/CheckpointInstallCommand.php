@@ -127,6 +127,14 @@ class CheckpointInstallCommand extends Command {
         $this->info('  List all checkpoints:');
         $this->info('    <comment>php artisan tyro-checkpoint:list</comment>');
         $this->info('');
+        $this->info('  View checkpoint details:');
+        $this->info('    <comment>php artisan tyro-checkpoint:details 1</comment>');
+        $this->info('    <comment>php artisan tyro-checkpoint:details my_checkpoint</comment>');
+        $this->info('');
+        $this->info('  Flag a checkpoint:');
+        $this->info('    <comment>php artisan tyro-checkpoint:flag 1</comment>');
+        $this->info('    <comment>php artisan tyro-checkpoint:unflag 1</comment>');
+        $this->info('');
         $this->info('  Restore a checkpoint:');
         $this->info('    <comment>php artisan tyro-checkpoint:restore 1</comment>');
         $this->info('    <comment>php artisan tyro-checkpoint:restore my_checkpoint</comment>');

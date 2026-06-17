@@ -2,6 +2,7 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
+use HasinHayder\TyroCheckpoint\Console\Commands\Concerns\FormatsCheckpointTables;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use Illuminate\Console\Command;
@@ -16,6 +17,8 @@ use Illuminate\Console\Command;
  *   php artisan tyro-checkpoint:flush --force
  */
 class CheckpointFlushCommand extends Command {
+    use FormatsCheckpointTables;
+
     /**
      * The name and signature of the console command.
      */
@@ -47,14 +50,14 @@ class CheckpointFlushCommand extends Command {
             $this->line('');
 
             // Display checkpoints in a table
-            $headers = ['ID', 'Name', 'Size', 'Created', 'Locked'];
+            $headers = ['ID', 'Name', 'Size', 'Created', 'locked'];
             $rows = $checkpoints->map(function ($checkpoint) use ($service) {
                 return [
                     $checkpoint->id,
-                    $checkpoint->name,
+                    $this->formatTableName($checkpoint),
                     $service->formatFileSize($checkpoint->size),
-                    $checkpoint->created_at->format('Y-m-d H:i:s'),
-                    $checkpoint->locked ? 'Yes' : 'No',
+                    $this->formatTableCreated($checkpoint->created_at),
+                    $this->formatTableLocked($checkpoint->locked),
                 ];
             })->toArray();
 

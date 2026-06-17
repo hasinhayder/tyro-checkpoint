@@ -2,6 +2,7 @@
 
 namespace HasinHayder\TyroCheckpoint\Console\Commands;
 
+use HasinHayder\TyroCheckpoint\Console\Commands\Concerns\FormatsCheckpointTables;
 use HasinHayder\TyroCheckpoint\Exceptions\CheckpointException;
 use HasinHayder\TyroCheckpoint\Services\CheckpointService;
 use Illuminate\Console\Command;
@@ -17,6 +18,8 @@ use Illuminate\Console\Command;
  *   php artisan tyro-checkpoint:delete my_checkpoint
  */
 class CheckpointDeleteCommand extends Command {
+    use FormatsCheckpointTables;
+
     /**
      * The name and signature of the console command.
      */
@@ -131,32 +134,17 @@ class CheckpointDeleteCommand extends Command {
     }
 
     /**
-     * Truncate note for display purposes.
-     */
-    private function truncateNote(string $note, int $maxLength = 30): string {
-        if (strlen($note) <= $maxLength) {
-            return $note;
-        }
-
-        return substr($note, 0, $maxLength).'...';
-    }
-
-    /**
      * Format checkpoints data for table display.
      */
     private function formatTableRows($checkpoints, $service): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
-            $name = $checkpoint->name;
-            if ($checkpoint->locked) {
-                $name .= ' 🔒';
-            }
             $row = [
                 $checkpoint->id,
-                $name,
-                $checkpoint->note ? $this->truncateNote($checkpoint->note, 20) : '-',
+                $this->formatTableName($checkpoint),
+                $this->formatTableNote($checkpoint->note),
                 $service->formatFileSize($checkpoint->size),
-                $checkpoint->created_at->format('Y-m-d H:i:s'),
+                $this->formatTableCreated($checkpoint->created_at),
             ];
 
             $rows[] = $row;

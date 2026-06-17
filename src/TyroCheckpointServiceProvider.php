@@ -5,12 +5,15 @@ namespace HasinHayder\TyroCheckpoint;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointAddNoteCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointCreateCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointDeleteCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointDetailsCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointFlushCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointGenerateKeyCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointInstallCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointListCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\CheckpointRestoreCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\FlagCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\LockCommand;
+use HasinHayder\TyroCheckpoint\Console\Commands\UnflagCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\UnlockCommand;
 use HasinHayder\TyroCheckpoint\Console\Commands\VersionCommand;
 use HasinHayder\TyroCheckpoint\Listeners\CreateCheckpointBeforeRiskyCommand;
@@ -42,6 +45,7 @@ class TyroCheckpointServiceProvider extends ServiceProvider {
             $this->commands([
                 CheckpointCreateCommand::class,
                 CheckpointListCommand::class,
+                CheckpointDetailsCommand::class,
                 CheckpointRestoreCommand::class,
                 CheckpointDeleteCommand::class,
                 CheckpointFlushCommand::class,
@@ -50,6 +54,8 @@ class TyroCheckpointServiceProvider extends ServiceProvider {
                 CheckpointAddNoteCommand::class,
                 LockCommand::class,
                 UnlockCommand::class,
+                FlagCommand::class,
+                UnflagCommand::class,
                 CheckpointGenerateKeyCommand::class,
             ]);
 
