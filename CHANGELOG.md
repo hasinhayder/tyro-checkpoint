@@ -10,6 +10,8 @@ All notable changes to Tyro Checkpoint will be documented in this file.
 - Add `tyro-checkpoint:details` command to inspect a checkpoint by ID or name.
 - Add `tyro-checkpoint:list {identifier}` as a shortcut for checkpoint details.
 - Add `tyro-checkpoint:flag` and `tyro-checkpoint:unflag` commands to mark checkpoints with a flag icon.
+- `tyro-checkpoint:flag` and `tyro-checkpoint:unflag` now display the full checkpoint list before prompting for an identifier.
+- `tyro-checkpoint:lock` and `tyro-checkpoint:unlock` now ask for the checkpoint identifier interactively when none is provided.
 
 ## [1.4.0] - 2026-06-17
 

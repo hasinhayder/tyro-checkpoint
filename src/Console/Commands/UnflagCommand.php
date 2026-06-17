@@ -30,6 +30,8 @@ class UnflagCommand extends Command {
      * Execute the console command.
      */
     public function handle(CheckpointService $service): int {
+        $this->call('tyro-checkpoint:list');
+
         $identifier = $this->argument('identifier') ?: $this->ask('Enter checkpoint ID or name to unflag');
 
         if (! $identifier) {

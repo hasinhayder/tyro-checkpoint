@@ -12,13 +12,14 @@ use Illuminate\Console\Command;
  * Locks a checkpoint to prevent accidental deletion.
  *
  * Usage:
+ *   php artisan tyro-checkpoint:lock
  *   php artisan tyro-checkpoint:lock {identifier}
  */
 class LockCommand extends Command {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:lock {identifier : The ID or name of the checkpoint to lock}';
+    protected $signature = 'tyro-checkpoint:lock {identifier? : The ID or name of the checkpoint to lock}';
 
     /**
      * The console command description.
@@ -29,11 +30,19 @@ class LockCommand extends Command {
      * Execute the console command.
      */
     public function handle(CheckpointService $service): int {
-        $identifier = $this->argument('identifier');
+        $this->call('tyro-checkpoint:list');
+
+        $identifier = $this->argument('identifier') ?: $this->ask('Enter checkpoint ID or name to lock');
+
+        if (! $identifier) {
+            $this->error('✗ No checkpoint selected.');
+
+            return self::FAILURE;
+        }
 
         try {
             // Attempt to lock the checkpoint
-            $checkpoint = $service->lock($identifier);
+            $checkpoint = $service->lock((string) $identifier);
 
             $this->info('✓ Checkpoint locked successfully!');
             $this->line('');

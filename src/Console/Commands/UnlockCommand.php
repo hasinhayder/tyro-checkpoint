@@ -12,13 +12,14 @@ use Illuminate\Console\Command;
  * Unlocks a checkpoint to allow deletion.
  *
  * Usage:
+ *   php artisan tyro-checkpoint:unlock
  *   php artisan tyro-checkpoint:unlock {identifier}
  */
 class UnlockCommand extends Command {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'tyro-checkpoint:unlock {identifier : The ID or name of the checkpoint to unlock}';
+    protected $signature = 'tyro-checkpoint:unlock {identifier? : The ID or name of the checkpoint to unlock}';
 
     /**
      * The console command description.
@@ -29,11 +30,19 @@ class UnlockCommand extends Command {
      * Execute the console command.
      */
     public function handle(CheckpointService $service): int {
-        $identifier = $this->argument('identifier');
+        $this->call('tyro-checkpoint:list');
+
+        $identifier = $this->argument('identifier') ?: $this->ask('Enter checkpoint ID or name to unlock');
+
+        if (! $identifier) {
+            $this->error('✗ No checkpoint selected.');
+
+            return self::FAILURE;
+        }
 
         try {
             // Attempt to unlock the checkpoint
-            $checkpoint = $service->unlock($identifier);
+            $checkpoint = $service->unlock((string) $identifier);
 
             $this->info('✓ Checkpoint unlocked successfully!');
             $this->line('');
