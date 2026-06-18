@@ -19,7 +19,7 @@ class VersionCommand extends Command {
      * Execute the console command.
      */
     public function handle(): int {
-        $version = '1.7.1'; // Fix add-note checkpoint ID selection
+        $version = '1.7.2'; // Fix locked checkpoint delete prompt
 
         $this->info('');
         $this->info('  ╔════════════════════════════════════════╗');
@@ -40,6 +40,7 @@ class VersionCommand extends Command {
     }
 }
 
+// 1.7.2 - Fix locked checkpoint delete prompt
 // 1.7.1 - Fix add-note checkpoint ID selection
 // 1.7.0 - In-place checkpoint encryption & configurable process timeout
 // 1.6.0 - MySQL & PostgreSQL support via driver abstraction

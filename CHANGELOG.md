@@ -2,6 +2,12 @@
 
 All notable changes to Tyro Checkpoint will be documented in this file.
 
+## [1.7.2] - 2026-06-18
+
+### Fixed
+
+- Fix `tyro-checkpoint:delete` so locked checkpoints are rejected before the confirmation prompt and tell users to unlock them before deleting.
+
 ## [1.7.1] - 2026-06-18
 
 ### Fixed

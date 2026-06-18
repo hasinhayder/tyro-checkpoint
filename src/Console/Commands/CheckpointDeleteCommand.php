@@ -96,15 +96,18 @@ class CheckpointDeleteCommand extends Command {
                 return self::FAILURE;
             }
 
+            if ($checkpoint->locked) {
+                $this->error('✗ This is a locked backup, and you cannot delete it. Please unlock it before deleting.');
+
+                return self::FAILURE;
+            }
+
             // Show checkpoint info and ask for confirmation
             $this->line('Checkpoint to delete:');
             $this->line("  ID:      {$checkpoint->id}");
             $this->line("  Name:    {$checkpoint->name}");
             $this->line("  Size:    {$service->formatFileSize($checkpoint->size)}");
             $this->line("  Created: {$checkpoint->created_at->format('Y-m-d H:i:s')}");
-            if ($checkpoint->locked) {
-                $this->line('  Status:  <comment>Locked</comment>');
-            }
             if ($checkpoint->note) {
                 $this->line("  Note:    {$checkpoint->note}");
             }
