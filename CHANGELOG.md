@@ -2,6 +2,12 @@
 
 All notable changes to Tyro Checkpoint will be documented in this file.
 
+## [1.7.1] - 2026-06-18
+
+### Fixed
+
+- Fix `tyro-checkpoint:add-note` interactive selection to show the full checkpoint list and accept the actual checkpoint ID instead of a generated sequence number.
+
 ## [1.7.0] - 2026-06-17
 
 ### Added

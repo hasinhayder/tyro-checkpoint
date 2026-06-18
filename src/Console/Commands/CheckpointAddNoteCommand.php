@@ -44,12 +44,10 @@ class CheckpointAddNoteCommand extends Command {
             }
 
             // Get the checkpoint identifier
-            $identifier = $this->getCheckpointIdentifier($checkpoints);
+            $identifier = $this->getCheckpointIdentifier($checkpoints, $service);
 
-            if (! $identifier) {
-                $this->error('✗ No checkpoint selected.');
-
-                return self::FAILURE;
+            if ($identifier === null) {
+                return self::SUCCESS;
             }
 
             // Validate identifier format
@@ -101,7 +99,7 @@ class CheckpointAddNoteCommand extends Command {
     /**
      * Get checkpoint identifier from argument or user selection.
      */
-    private function getCheckpointIdentifier($checkpoints): ?string {
+    private function getCheckpointIdentifier($checkpoints, CheckpointService $service): int|string|null {
         $identifier = $this->argument('id');
 
         if ($identifier) {
@@ -112,36 +110,31 @@ class CheckpointAddNoteCommand extends Command {
         $this->info('Available checkpoints:');
         $this->line('');
 
-        $options = [];
-        $indexMap = [];
-        $index = 1;
-
-        foreach ($checkpoints as $checkpoint) {
-            $label = "#{$checkpoint->id} - {$checkpoint->name}";
-            if ($checkpoint->note) {
-                $label .= ' (Current note: '.$this->formatTableNote($checkpoint).')';
-            }
-            $options[$index] = $label;
-            $indexMap[$index] = $checkpoint->id;
-            $index++;
+        $showDatabase = $this->isMixedDatabases($checkpoints);
+        $headers = ['ID', 'Name'];
+        if ($showDatabase) {
+            $headers[] = 'Database';
         }
-
-        $headers = ['#', 'Name', 'Note'];
-        $rows = $this->formatTableRows($checkpoints);
+        $headers = array_merge($headers, ['Note', 'Size', 'Created', 'Enc']);
+        $rows = $this->formatTableRows($checkpoints, $service, $showDatabase);
         $this->table($headers, $rows);
 
-        $selectedLabel = $this->choice(
-            'Select a checkpoint to add/update note',
-            $options,
-            null,
-            null,
-            false // Allow multiple selections to be disabled
-        );
+        $availableIds = $checkpoints->pluck('id')->toArray();
 
-        // Find the index that corresponds to the selected label
-        $selectedIndex = array_search($selectedLabel, $options);
+        $this->line('');
+        $input = $this->ask('Enter checkpoint ID to add/update note (0 to quit)');
 
-        return $indexMap[$selectedIndex] ?? null;
+        if ($input === '0' || $input === 0) {
+            $this->info('Operation cancelled.');
+
+            return null;
+        }
+
+        if (! is_numeric($input) || ! in_array((int) $input, $availableIds, true)) {
+            throw new CheckpointException("Invalid checkpoint ID: {$input}");
+        }
+
+        return (int) $input;
     }
 
     /**
@@ -204,19 +197,22 @@ class CheckpointAddNoteCommand extends Command {
     /**
      * Format checkpoints data for table display.
      */
-    private function formatTableRows($checkpoints): array {
+    private function formatTableRows($checkpoints, CheckpointService $service, bool $showDatabase = false): array {
         $rows = [];
         foreach ($checkpoints as $checkpoint) {
             $row = [
-                "#{$checkpoint->id}",
+                $checkpoint->id,
                 $this->formatTableName($checkpoint),
             ];
 
-            if ($checkpoint->note) {
-                $row[] = $this->formatTableNote($checkpoint);
-            } else {
-                $row[] = '<comment>No note</comment>';
+            if ($showDatabase) {
+                $row[] = $this->formatDatabaseLabel($checkpoint);
             }
+
+            $row[] = $this->formatTableNote($checkpoint);
+            $row[] = $service->formatFileSize($checkpoint->size);
+            $row[] = $this->formatTableCreated($checkpoint->created_at);
+            $row[] = $this->formatTableEncrypted($checkpoint->encrypted);
 
             $rows[] = $row;
         }
