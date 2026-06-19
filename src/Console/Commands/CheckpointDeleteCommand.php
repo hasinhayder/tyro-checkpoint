@@ -26,6 +26,11 @@ class CheckpointDeleteCommand extends Command {
     protected $signature = 'tyro-checkpoint:delete {identifier? : Checkpoint ID or name to delete}';
 
     /**
+     * The console command name aliases.
+     */
+    protected $aliases = ['tyro-checkpoint:remove'];
+
+    /**
      * The console command description.
      */
     protected $description = 'Delete a database checkpoint';

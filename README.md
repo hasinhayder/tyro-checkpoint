@@ -27,7 +27,7 @@ php artisan tyro-checkpoint:install
 | `tyro-checkpoint:list [id\|name]` | List checkpoints (or view one) |
 | `tyro-checkpoint:details [id\|name]` | Show checkpoint details |
 | `tyro-checkpoint:restore [id\|name]` | Restore a checkpoint |
-| `tyro-checkpoint:delete [id\|name]` | Delete a checkpoint |
+| `tyro-checkpoint:delete [id\|name]` | Delete a checkpoint (alias: `remove`) |
 | `tyro-checkpoint:flush [--force]` | Delete all **unlocked** checkpoints |
 | `tyro-checkpoint:lock [id\|name]` | Lock (prevent deletion) |
 | `tyro-checkpoint:unlock [id\|name]` | Unlock |

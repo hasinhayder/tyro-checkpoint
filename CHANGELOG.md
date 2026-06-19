@@ -2,6 +2,12 @@
 
 All notable changes to Tyro Checkpoint will be documented in this file.
 
+## [1.8.0] - 2026-06-19
+
+### Added
+
+- Add `tyro-checkpoint:remove` as an alias for `tyro-checkpoint:delete`.
+
 ## [1.7.2] - 2026-06-18
 
 ### Fixed
