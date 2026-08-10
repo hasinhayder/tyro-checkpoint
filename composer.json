@@ -1,6 +1,6 @@
 {
     "name": "hasinhayder/tyro-checkpoint",
-    "description": "Database checkpoint management for Laravel local development",
+    "description": "Database checkpoints for Laravel local development. Snapshot your database and restore it instantly. Supports SQLite, MySQL, and PostgreSQL.",
     "type": "library",
     "license": "MIT",
     "authors": [
